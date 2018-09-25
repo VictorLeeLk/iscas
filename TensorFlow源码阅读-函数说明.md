@@ -419,7 +419,7 @@ Cooker
 
 
 
-- deque
+- **deque**
 
 使用`list`存储数据时，按索引访问元素很快，但是插入和删除元素就很慢了，因为`list`是线性存储，数据量大的时候，插入和删除效率很低。
 
@@ -1550,6 +1550,10 @@ saver.restore(...checkpoint filename...)12345
 
 ## tf.get_collection()
 
+> 从一个结合中取出全部变量，是一个列表;
+>
+> `tensorflow`的`collection`提供一个全局的存储机制，不会受到`变量名`生存空间的影响。一处保存，到处可取。
+
 ```
 函数：tf.get_collection
 get_collection(
@@ -1606,7 +1610,7 @@ get_collection_ref(key)
 | `tf.GraphKeys.QUEUE_RUNNERS`            | 处理输入的QueueRunner                | 输入处理                     |
 | `tf.GraphKeys.MOVING_AVERAGE_VARIABLES` | 所有计算了滑动平均值的变量           | 计算变量的滑动平均值         |
 
-## Variables: 创建、初始化、保存和加载
+## tf.Variables
 
 - 引言
 
@@ -1781,7 +1785,136 @@ saver = tf.train.Saver({"my_v2": v2})
 ...12345678
 ```
 
+## tf.summary.merge_all
 
+- tf.summary模块的简介
+
+在TensorFlow中，最常用的可视化方法有三种途径，分别为TensorFlow与OpenCv的混合编程，利用Matpltlib进行可视化、利用TensorFlow自带的可视化工具TensorBoard进行可视化。这三种方法，在前面博客中都有过比较详细的介绍。但是，TensorFlow中最重要的可视化方法是通过tensorBoard、tf.summary和tf.summary.FileWriter这三个模块相互合作来完成的。
+
+ tf.summary模块的定义位于summary.py文件中，该文件中主要定义了在进行**可视化将要用到的各种函数，**tf.summary包含的主要函数如下所示：
+
+```
+
+def scalar(name, tensor, collections=None, family=None)                     
+def image(name, tensor, max_outputs=3, collections=None, family=None)
+def histogram(name, values, collections=None, family=None)
+def audio(name, tensor, sample_rate, max_outputs=3, collections=None,family=None)
+def merge(inputs, collections=None, name=None)
+def merge_all(key=_ops.GraphKeys.SUMMARIES, scope=None)
+def get_summary_description(node_def)
+```
+
+
+
+```
+#========================================================================================================
+#函数原型:
+#       def merge_all(key=_ops.GraphKeys.SUMMARIES, scope=None)
+#函数说明：
+#       [1]将之前定义的所有summary整合在一起
+#       [2]和TensorFlow中的其他操作类似，tf.summary.scalar、tf.summary.histogram、tf.summary.image函数也是一个op，它们在定义的时候，也不会立即执行，需要通过sess.run来明确调用这些函数。因为，在一个程序中定义的写日志操作比较多，如果一一调用，将会十分麻烦，所以Tensorflow提供了tf.summary.merge_all()函数将所有的summary整理在一起。在TensorFlow程序执行的时候，只需要运行这一个操作就可以将代码中定义的所有【写日志操作】执行一次，从而将所有的日志写入【日志文件】。
+
+#参数说明：
+#       [1]key  : 用于收集summaries的GraphKey，默认的为GraphKeys.SUMMARIES
+#       [2]scope：可选参数
+#========================================================================================================
+
+```
+
+## tf.summary.scalar
+
+```
+#========================================================================================================
+#函数原型:
+#       def scalar(name, tensor, collections=None, family=None)
+#函数说明：
+#       [1]输出一个含有标量值的Summary protocol buffer，这是一种能够被tensorboard模块解析的【结构化数据格式】
+#       [2]用来显示标量信息
+#       [3]用来可视化标量信息
+#       [4]其实，tensorflow中的所有summmary操作都是对计算图中的某个tensor产生的单个summary protocol buffer，而
+#          summary protocol buffer又是一种能够被tensorboard解析并进行可视化的结构化数据格式
+#       虽然，上面的四种解释可能比较正规，但是我感觉理解起来不太好，所以，我将tf.summary.scalar()函数的功能理解为：
+#       [1]将【计算图】中的【标量数据】写入TensorFlow中的【日志文件】，以便为将来tensorboard的可视化做准备
+#参数说明：
+#       [1]name  :一个节点的名字，如下图红色矩形框所示
+#       [2]tensor:要可视化的数据、张量
+#主要用途：
+#       一般在画loss曲线和accuary曲线时会用到这个函数。
+#=======================================================================================================
+
+```
+
+## tf.summary.image
+
+```
+#========================================================================================================
+#函数原型:
+#       def image(name, tensor, max_outputs=3, collections=None, family=None)
+#函数说明：
+#       [1]输出一个包含图像的summary,这个图像是通过一个4维张量构建的，这个张量的四个维度如下所示：
+#              [batch_size,height, width, channels]
+#       [2]其中参数channels有三种取值：
+#              [1]1: `tensor` is interpreted as Grayscale,如果为1，那么这个张量被解释为灰度图像
+#              [2]3: `tensor` is interpreted as RGB,如果为3，那么这个张量被解释为RGB彩色图像
+#              [3]4: `tensor` is interpreted as Grayscale,如果为4，那么这个张量被解释为RGBA四通道图像
+#       [3]输入给这个函数的所有图像必须规格一致(长，宽，通道，数据类型)，并且数据类型必须为uint8，即所有的像素值在
+#              [0,255]这个范围
+#       虽然，上面的三种解释可能比较正规，但是我感觉理解起来不太好，所以，我将tf.summary.image()函数的功能理解为：
+#       [1]将【计算图】中的【图像数据】写入TensorFlow中的【日志文件】，以便为将来tensorboard的可视化做准备
+#
+#参数说明：
+#       [1]name  :一个节点的名字，如下图红色矩形框所示
+#       [2]tensor:要可视化的图像数据，一个四维的张量，元素类型为uint8或者float32，维度为[batch_size, height,
+#                 width, channels]
+#       [3]max_outputs:输出的通道数量，可以结合下面的示例代码进行理解
+#主要用途：
+#       一般用在神经网络中图像的可视化
+#========================================================================================================
+
+```
+
+
+
+## tf.summary.FileWriter
+
+```
+#========================================================================================================
+#类定义原型:
+#       class FileWriter(SummaryToEventTransformer)
+#类说明：
+#      [1]将Summary protocol buffers写入磁盘文件
+#      [2]FileWriter类提供了一种用于在给定目录下创建事件文件的机制，并且将summary数据写入硬盘
+#构造函数：
+#        def __init__(self,logdir,graph=None,max_queue=10,flush_secs=120,graph_def=None,filename_suffix=None):
+ 
+#参数说明：
+#       [1]self  : 类对象自身
+#       [2]logdir：用于存储【日志文件】的目录
+#       [3]graph : 将要存储的计算图
+#应用示例：
+#       summary_writer = tf.summary.FileWriter(SUMMARY_DIR,sess.graph)：创建一个FileWrite的类对象，并将计算图
+#           写入文件
+#========================================================================================================
+
+```
+
+## tf.summary.FileWriter.add_summary
+
+```
+#==================================================================================================
+#函数原型：
+#        def add_summary(self, summary, global_step=None)
+#函数说明:
+#        [1]该函数是tf.summary.FileWriter父类中的成员函数
+#        [2]将一个`Summary` protocol buffer添加到事件文件，写入事件文件
+#参数说明：
+#       [1]self   : 类对象自身
+#       [2]summary：将要写入的summary
+#       [3]graph  : global_step,当前迭代的轮数，需要注意的是，如果没有这个参数，那么scalar的summary将会成为一条直线
+#应用示例：
+#       summary_writer.add_summary(summary,i)
+#==================================================================================================
+```
 
 
 
