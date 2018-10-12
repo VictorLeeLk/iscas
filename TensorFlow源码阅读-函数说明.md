@@ -1,3 +1,5 @@
+# 
+
 # Python基本函数
 
 ## Python类中方法介绍
@@ -436,6 +438,61 @@ deque(['y', 'a', 'b', 'c', 'x'])
 
 `deque`除了实现list的`append()`和`pop()`外，还支持`appendleft()`和`popleft()`，这样就可以非常高效地往头部添加或删除元素。
 
+## numpy.expand_dims()
+
+```
+numpy.expand_dims¶
+numpy.expand_dims(a, axis)[source]
+Expand the shape of an array.
+
+Insert a new axis, corresponding to a given position in the array shape.
+
+Parameters:	
+a : array_like
+
+Input array.
+
+axis : int
+
+Position (amongst axes) where new axis is to be inserted.
+
+Returns:	
+res : ndarray
+
+Output array. The number of dimensions is one greater than that of the input array.
+
+See also
+doc.indexing, atleast_1d, atleast_2d, atleast_3d
+
+Examples
+
+>>>
+>>> x = np.array([1,2])
+>>> x.shape
+(2,)
+The following is equivalent to x[np.newaxis,:] or x[np.newaxis]:
+
+>>>
+>>> y = np.expand_dims(x, axis=0)
+>>> y
+array([[1, 2]])
+>>> y.shape
+(1, 2)
+>>>
+>>> y = np.expand_dims(x, axis=1)  # Equivalent to x[:,newaxis]
+>>> y
+array([[1],
+       [2]])
+>>> y.shape
+(2, 1)
+Note that some examples may use None instead of np.newaxis. These are the same objects:
+
+>>>
+>>> np.newaxis is None
+True
+
+```
+
 
 
 # TensorFlow源码阅读-函数说明
@@ -660,7 +717,7 @@ stack 操作也可用，它通过重复应用层来构建一叠层。
 说明：定义卷积层
 
 ```
-defconvolution(inputs,
+def convolution(inputs,
                 num_outputs,
                 kernel_size,
                 stride=1,
@@ -1916,9 +1973,199 @@ def get_summary_description(node_def)
 #==================================================================================================
 ```
 
+## tf.image.rgb_to_grayscale
 
+定义在：[tensorflow/python/ops/image_ops_impl.py](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-ats62pzl.html)。
 
-#  **DQN源码阅读**
+请参阅指南：[图像操作>颜色空间之间的转换](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-36ws28ue.html)
+
+将一个或多个图像从RGB转换为灰度。 
+
+输出与images具有相同DType和等级的张量。输出的最后一个维度的大小为1，包含像素的灰度值。
+
+参数：
+
+- images：要转换的RGB张量，最后一个维度的大小必须为3，并且应该包含RGB值。
+- name：操作的名称（可选）。
+
+返回：
+
+该函数返回转换后的灰度图像。
+
+```
+
+@tf_export('image.rgb_to_grayscale')
+def rgb_to_grayscale(images, name=None):
+  """Converts one or more images from RGB to Grayscale.
+  Outputs a tensor of the same `DType` and rank as `images`.  The size of the
+  last dimension of the output is 1, containing the Grayscale value of the
+  pixels.
+  Args:
+    images: The RGB tensor to convert. Last dimension must have size 3 and
+      should contain RGB values.
+    name: A name for the operation (optional).
+  Returns:
+    The converted grayscale image(s).
+  """
+  with ops.name_scope(name, 'rgb_to_grayscale', [images]) as name:
+    images = ops.convert_to_tensor(images, name='images')
+    # Remember original dtype to so we can convert back if needed
+    orig_dtype = images.dtype
+    flt_image = convert_image_dtype(images, dtypes.float32)
+
+    # Reference for converting between RGB and grayscale.
+    # https://en.wikipedia.org/wiki/Luma_%28video%29
+    rgb_weights = [0.2989, 0.5870, 0.1140]
+    gray_float = math_ops.tensordot(flt_image, rgb_weights, [-1, -1])
+    gray_float = array_ops.expand_dims(gray_float, -1)
+    return convert_image_dtype(gray_float, orig_dtype, name=name)
+
+```
+
+## tf.squeeze函数
+
+```
+squeeze(
+    input,
+    axis=None,
+    name=None,
+    squeeze_dims=None
+)
+```
+
+定义在：[tensorflow/python/ops/array_ops.py](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-9gip2cze.html)。
+
+参见指南：[张量变换>形状的确定与改变](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-85v22c69.html)
+
+从张量形状中移除大小为1的维度。
+
+给定一个张量 input，该操作返回一个与已经移除的所有大小为1的维度具有相同类型的张量。如果您不想删除所有大小为1的维度，则可以通过指定 axis 来删除特定的大小为1的维度。
+
+如本例所示：
+
+```
+# 't' is a tensor of shape [1, 2, 1, 3, 1, 1]
+tf.shape(tf.squeeze(t))  # [2, 3]
+```
+
+或者，要删除特定的大小为1的维度：
+
+```
+# 't' is a tensor of shape [1, 2, 1, 3, 1, 1]
+tf.shape(tf.squeeze(t, [2, 4]))  # [1, 2, 3, 1]
+```
+
+函数参数：
+
+- input：A Tensor。该input挤。
+- axis：一个可选列表ints。默认为[]。如果指定，只能挤压列出的尺寸。维度索引从0开始。压缩非1的维度是错误的。必须在范围内[-rank(input), rank(input))。
+- name：操作的名称（可选）。
+- squeeze_dims：现在是轴的已弃用的关键字参数。
+
+函数返回值：
+
+一Tensor。与。类型相同input。包含与之相同的数据input，但删除了一个或多个尺寸为1的尺寸。
+
+可能引发的异常：
+
+- ValueError：当两个squeeze_dims和axis指定。
+
+## tf.set_random_seed 函数
+
+```
+set_random_seed(seed)
+```
+
+定义在：[tensorflow/python/framework/random_seed.py](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-nhbg2jvp.html)。
+
+请参阅指南：[生成常量，序列和随机值>随机张量](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-efts28tw.html)
+
+设置图形级随机seed。
+
+可以从两个seed中获得依赖随机seed的操作：图形级seed和操作级seed。本节是介绍如何设置图形级别的seed。
+
+它与操作级别seed的交互如下：
+
+1. 如果既没有设置图层级也没有设置操作级别的seed：则使用随机seed进行该操作。
+2. 如果设置了图形级seed，但操作seed没有设置：系统确定性地选择与图形级seed结合的操作seed，以便获得唯一的随机序列。
+3. 如果未设置图形级seed，但设置了操作seed：使用默认的图层seed和指定的操作seed来确定随机序列。
+4. 如果图层级seed和操作seed都被设置：则两个seed将一起用于确定随机序列。
+
+为了说明用户可见的效果，请考虑以下示例：
+
+要在会话中生成不同的序列，请不要设置图层级别seed或操作级别seed：
+
+```
+a = tf.random_uniform([1])
+b = tf.random_normal([1])
+
+print("Session 1")
+with tf.Session() as sess1:
+  print(sess1.run(a))  # generates 'A1'
+  print(sess1.run(a))  # generates 'A2'
+  print(sess1.run(b))  # generates 'B1'
+  print(sess1.run(b))  # generates 'B2'
+
+print("Session 2")
+with tf.Session() as sess2:
+  print(sess2.run(a))  # generates 'A3'
+  print(sess2.run(a))  # generates 'A4'
+  print(sess2.run(b))  # generates 'B3'
+  print(sess2.run(b))  # generates 'B4'
+```
+
+要为会话中的操作生成相同的可重复序列，请为操作设置seed：
+
+```
+a = tf.random_uniform([1], seed=1)
+b = tf.random_normal([1])
+
+# Repeatedly running this block with the same graph will generate the same
+# sequence of values for 'a', but different sequences of values for 'b'.
+print("Session 1")
+with tf.Session() as sess1:
+  print(sess1.run(a))  # generates 'A1'
+  print(sess1.run(a))  # generates 'A2'
+  print(sess1.run(b))  # generates 'B1'
+  print(sess1.run(b))  # generates 'B2'
+
+print("Session 2")
+with tf.Session() as sess2:
+  print(sess2.run(a))  # generates 'A1'
+  print(sess2.run(a))  # generates 'A2'
+  print(sess2.run(b))  # generates 'B3'
+  print(sess2.run(b))  # generates 'B4'
+```
+
+要使所有操作生成的随机序列在会话中可重复，请设置图形级别seed：
+
+```
+tf.set_random_seed(1234)
+a = tf.random_uniform([1])
+b = tf.random_normal([1])
+
+# Repeatedly running this block with the same graph will generate the same
+# sequences of 'a' and 'b'.
+print("Session 1")
+with tf.Session() as sess1:
+  print(sess1.run(a))  # generates 'A1'
+  print(sess1.run(a))  # generates 'A2'
+  print(sess1.run(b))  # generates 'B1'
+  print(sess1.run(b))  # generates 'B2'
+
+print("Session 2")
+with tf.Session() as sess2:
+  print(sess2.run(a))  # generates 'A1'
+  print(sess2.run(a))  # generates 'A2'
+  print(sess2.run(b))  # generates 'B1'
+  print(sess2.run(b))  # generates 'B2'
+```
+
+函数参数
+
+- seed：整数。
+
+#  DQN源码阅读**
 
 > 2018/8/20
 
@@ -2352,7 +2599,9 @@ with tf.Session() as sess:
 
 
 
-### 状态处理
+### class StateProcessor():
+
+#### 状态处理
 
 输入：state,也就是Atari RGB State(图像)
 
@@ -2385,7 +2634,9 @@ class StateProcessor():
         return sess.run(self.output, { self.input_state: state })
 ```
 
-### Q-值评估神经网络，包括Q值网络以及目标网络
+### class Estimator():
+
+#### Q-值评估神经网络，包括Q值网络以及目标网络
 
 ```
 1）  tf.summary()的各类方法：能够保存训练过程以及参数分布图并在tensorboard显示。
@@ -2502,9 +2753,11 @@ class Estimator():
         return loss
 ```
 
+#### global_step
 
+global_step在滑动平均、优化器、指数衰减学习率等方面都有用到，这个变量的实际意义非常好理解：代表全局步数，比如在多少步该进行什么操作，现在神经网络训练到多少轮等等，类似于一个钟表。
 
-### gather函数
+#### gather函数
 
 ```
 import tensorflow as tf
@@ -2523,7 +2776,7 @@ with tf.Session() as sess:
 [11 51 91]
 ```
 
-### tf.train.Saver(模型保存和读取)
+#### tf.train.Saver(模型保存和读取)
 
 深度学习平台：TensorFlow    
 
@@ -2612,9 +2865,62 @@ with tf.Session() as sess:
 2. model.ckpt 必须存在给定文件夹中，'tmp/model.ckpt' 这里至少要有一层文件夹，否则无法保存。
 3. 恢复模型时同保存时一样，是 ‘tmp/model.ckpt’，和那3个文件名都不一样。
 
+### copy_model_parameters
+
+> 赋值操作，将estimator1的网络参数值赋值给estimator2网络。
+
+```
+def copy_model_parameters(sess, estimator1, estimator2):
+    """
+    Copies the model parameters of one estimator to another.
+
+    Args:
+      sess: Tensorflow session instance
+      estimator1: Estimator to copy the paramters from
+      estimator2: Estimator to copy the parameters to
+    """
+    e1_params = [t for t in tf.trainable_variables() if t.name.startswith(estimator1.scope)]
+    e1_params = sorted(e1_params, key=lambda v: v.name)
+    e2_params = [t for t in tf.trainable_variables() if t.name.startswith(estimator2.scope)]
+    e2_params = sorted(e2_params, key=lambda v: v.name)
+
+    update_ops = []
+    for e1_v, e2_v in zip(e1_params, e2_params):
+        op = e2_v.assign(e1_v)
+        update_ops.append(op)
+
+    sess.run(update_ops)
+```
 
 
-#### 
+
+### make_epsilon_greedy_policy():
+
+```
+def make_epsilon_greedy_policy(estimator, nA):
+    """
+    Creates an epsilon-greedy policy based on a given Q-function approximator and epsilon.
+
+    Args:
+        estimator: An estimator that returns q values for a given state
+        nA: Number of actions in the environment.
+
+    Returns:
+        A function that takes the (sess, observation, epsilon) as an argument and returns
+        the probabilities for each action in the form of a numpy array of length nA.
+
+    """
+    def policy_fn(sess, observation, epsilon):
+        A = np.ones(nA, dtype=float) * epsilon / nA
+        q_values = estimator.predict(sess, np.expand_dims(observation, 0))[0]
+        best_action = np.argmax(q_values)
+        A[best_action] += (1.0 - epsilon)
+        #print('A=',A)                               #lk add   [0.025,0.925,0.025,0.025],其中某一个维度为0.925,其他维度为0.025，每一次结果可能都不一样
+        return A
+    return policy_fn
+```
+
+
 
 
 
