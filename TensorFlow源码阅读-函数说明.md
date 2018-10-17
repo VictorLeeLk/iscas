@@ -2165,7 +2165,7 @@ with tf.Session() as sess2:
 
 - seed：整数。
 
-#  DQN源码阅读**
+#  DQN源码阅读
 
 > 2018/8/20
 
