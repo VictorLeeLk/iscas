@@ -1,4 +1,4 @@
 git is a version of control software!
 
-git for windows
+git for windows and linux
 
