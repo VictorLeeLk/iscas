@@ -301,6 +301,12 @@ Random number with seed 10 :  0.57140259469
 Random number with seed 10 :  0.57140259469
 ```
 
+- python np.random.randn()
+
+**函数原型：**np.random.randn（d1,d2,...,dn），或者randn(*[d1,d2,...,dn])
+
+**返回：**产生均值为0，方差为1，维度为n的标准正太分布。
+
 ## lambda匿名函数
 
 python 使用 lambda 来创建匿名函数。
@@ -495,7 +501,7 @@ True
 
 ## python @property
 
-> **作用：**将方法转换成属性来进行使用，可以进行读取数据。如果只有@property，则该属性为只读属性。如果加上@***.setter则该属性为可以修改，并且定义的方法可以进行类型检查，及时检测错误。
+> **作用：**将（类中）方法转换成属性来进行调用，可以进行读取数据。如果只有@property，则该属性为只读属性。如果加上@***（方法名，或者说属性名）.setter则该属性为可以修改，并且定义的方法可以进行类型检查，及时检测错误。
 
 在绑定属性时，如果我们直接把属性暴露出去，虽然写起来很简单，但是，没办法检查参数，导致可以把成绩随便改：
 
@@ -594,11 +600,496 @@ class Student(object):
 
 `@property`广泛应用在类的定义中，可以让调用者写出简短的代码，同时保证对参数进行必要的检查，这样，程序运行时就减少了出错的可能性。
 
+## python numpy.logaddexp()
+
+Logarithm of the sum of exponentiations of the inputs.
+
+先求参数的指数和，然后使用对数函数求取对数
+
+Calculates `log(exp(x1) + exp(x2))`. This function is useful in statistics where the calculated probabilities of events may be so small as to exceed the range of normal floating point numbers. In such cases the logarithm of the calculated probability is stored. This function allows adding probabilities stored in such a fashion.
+
+**x1, x2** : array_like
+
+> Input values.
+
+**result** : ndarray
+
+> Logarithm of `exp(x1) + exp(x2)`.
+
+ ```
+>>> prob1 = np.log(1e-50)
+>>> prob2 = np.log(2.5e-50)
+>>> prob12 = np.logaddexp(prob1, prob2)
+>>> prob12
+-113.87649168120691
+>>> np.exp(prob12)
+3.5000000000000057e-50
+ ```
+
+## Python super 详解
+
+说到 super， 大家可能觉得很简单呀，不就是用来调用父类方法的嘛。如果真的这么简单的话也就不会有这篇文章了，且听我细细道来。
+
+**super()** 函数是用于调用父类(超类)的一个方法。
+
+super 是用来解决多重继承问题的，直接用类名调用父类方法在使用单继承的时候没问题，但是如果使用多继承，会涉及到查找顺序（MRO）、重复调用（钻石继承）等种种问题。
+
+MRO 就是类的方法解析顺序表, 其实也就是继承父类方法时的顺序表。
+
+- 约定 
+
+object
+
+```
+# 默认， Python 3
+class A:
+    pass
+
+# Python 2
+class A(object):
+    pass
+```
+
+Python 3 和 Python 2 的另一个区别是: Python 3 可以使用直接使用 super().xxx 代替 super(Class, self).xxx :
+
+```
+# 默认，Python 3
+class B(A):
+    def add(self, x):
+        super().add(x)
+
+# Python 2
+class B(A):
+    def add(self, x):
+        super(B, self).add(x)
+```
+
+所以，你如果用的是 Python 2 的话，记得将本文的 super() 替换为 suepr(Class, self) 。
+
+如果还有其他不兼容 Python 2 的情况，我会在文中注明的。
+
+- 单继承
+
+在单继承中 super 就像大家所想的那样，主要是用来调用父类的方法的。
+
+```
+class A:
+    def __init__(self):
+        self.n = 2
+
+    def add(self, m):
+        print('self is {0} @A.add'.format(self))
+        self.n += m
+
+
+class B(A):
+    def __init__(self):
+        self.n = 3
+
+    def add(self, m):
+        print('self is {0} @B.add'.format(self))
+        super().add(m)
+        self.n += 3
+```
+
+你觉得执行下面代码后， b.n 的值是多少呢？
+
+```
+b = B()
+b.add(2)
+print(b.n)
+```
+
+执行结果如下:
+
+```
+self is <__main__.B object at 0x106c49b38> @B.add
+self is <__main__.B object at 0x106c49b38> @A.add
+8
+```
+
+这个结果说明了两个问题:
+
+- 1、super().add(m) 确实调用了父类 A 的 add 方法。
+- 2、super().add(m) 调用父类方法 def add(self, m) 时, 此时父类中 self 并不是父类的实例而是子类的实例, 所以 b.add(2) 之后的结果是 5 而不是 4 。
+
+不知道这个结果是否和你想到一样呢？下面我们来看一个多继承的例子。
+
+- 多继承
+
+这次我们再定义一个 class C，一个 class D:
+
+```
+class C(A):
+    def __init__(self):
+        self.n = 4
+
+    def add(self, m):
+        print('self is {0} @C.add'.format(self))
+        super().add(m)
+        self.n += 4
+
+
+class D(B, C):
+    def __init__(self):
+        self.n = 5
+
+    def add(self, m):
+        print('self is {0} @D.add'.format(self))
+        super().add(m)
+        self.n += 5
+```
+
+下面的代码又输出啥呢？
+
+```
+d = D()
+d.add(2)
+print(d.n)
+```
+
+这次的输出如下:
+
+```
+self is <__main__.D object at 0x10ce10e48> @D.add
+self is <__main__.D object at 0x10ce10e48> @B.add
+self is <__main__.D object at 0x10ce10e48> @C.add
+self is <__main__.D object at 0x10ce10e48> @A.add
+19
+```
+
+你说对了吗？你可能会认为上面代码的输出类似:
+
+```
+self is <__main__.D object at 0x10ce10e48> @D.add
+self is <__main__.D object at 0x10ce10e48> @B.add
+self is <__main__.D object at 0x10ce10e48> @A.add
+15
+```
+
+为什么会跟预期的不一样呢？下面我们将一起来看看 super 的奥秘。
+
+- super 是个类
+
+当我们调用 super() 的时候，实际上是实例化了一个 super 类。你没看错， super 是个类，既不是关键字也不是函数等其他数据结构:
+
+```
+>>> class A: pass
+...
+>>> s = super(A)
+>>> type(s)
+<class 'super'>
+>>>
+```
+
+在大多数情况下， super 包含了两个非常重要的信息: 一个 MRO 以及 MRO 中的一个类。当以如下方式调用 super 时:
+
+```
+super(a_type, obj)
+```
+
+**MRO** 指的是 type(obj) 的 MRO, MRO 中的那个类就是 a_type , 同时 isinstance(obj, a_type) == True 。
+
+当这样调用时:
+
+```
+super(type1, type2)
+```
+
+MRO 指的是 type2 的 **MRO**, **MRO** 中的那个类就是 type1 ，同时 issubclass(type2, type1) == True 。
+
+那么， super() 实际上做了啥呢？简单来说就是：提供一个 **MRO** 以及一个 **MRO** 中的类 C ， super() 将返回一个从 **MRO** 中 C 之后的类中查找方法的对象。
+
+也就是说，查找方式时不是像常规方法一样从所有的 **MRO** 类中查找，而是从 **MRO** 的 tail 中查找。
+
+举个例子, 有个 **MRO**:
+
+```
+[A, B, C, D, E, object]
+```
+
+下面的调用:
+
+```
+super(C, A).foo()
+```
+
+super 只会从 C 之后查找，即: 只会在 D 或 E 或 object 中查找 foo 方法。
+
+- 多继承中 super 的工作方式
+
+再回到前面的
+
+```
+d = D()
+d.add(2)
+print(d.n)
+```
+
+现在你可能已经有点眉目，为什么输出会是
+
+```
+self is <__main__.D object at 0x10ce10e48> @D.add
+self is <__main__.D object at 0x10ce10e48> @B.add
+self is <__main__.D object at 0x10ce10e48> @C.add
+self is <__main__.D object at 0x10ce10e48> @A.add
+19
+```
+
+了吧 ;)
+
+下面我们来具体分析一下:
+
+- D 的 **MRO** 是: [D, B, C, A, object] 。 **备注:** 可以通过 D.mro() (Python 2 使用 D.__mro__ ) 来查看 D 的 **MRO** 信息）
+
+- 详细的代码分析如下:
+
+  ```
+  class A:
+      def __init__(self):
+          self.n = 2
+  
+      def add(self, m):
+          # 第四步
+          # 来自 D.add 中的 super
+          # self == d, self.n == d.n == 5
+          print('self is {0} @A.add'.format(self))
+          self.n += m
+          # d.n == 7
+  
+  
+  class B(A):
+      def __init__(self):
+          self.n = 3
+  
+      def add(self, m):
+          # 第二步
+          # 来自 D.add 中的 super
+          # self == d, self.n == d.n == 5
+          print('self is {0} @B.add'.format(self))
+          # 等价于 suepr(B, self).add(m)
+          # self 的 MRO 是 [D, B, C, A, object]
+          # 从 B 之后的 [C, A, object] 中查找 add 方法
+          super().add(m)
+  
+          # 第六步
+          # d.n = 11
+          self.n += 3
+          # d.n = 14
+  
+  class C(A):
+      def __init__(self):
+          self.n = 4
+  
+      def add(self, m):
+          # 第三步
+          # 来自 B.add 中的 super
+          # self == d, self.n == d.n == 5
+          print('self is {0} @C.add'.format(self))
+          # 等价于 suepr(C, self).add(m)
+          # self 的 MRO 是 [D, B, C, A, object]
+          # 从 C 之后的 [A, object] 中查找 add 方法
+          super().add(m)
+  
+          # 第五步
+          # d.n = 7
+          self.n += 4
+          # d.n = 11
+  
+  
+  class D(B, C):
+      def __init__(self):
+          self.n = 5
+  
+      def add(self, m):
+          # 第一步
+          print('self is {0} @D.add'.format(self))
+          # 等价于 super(D, self).add(m)
+          # self 的 MRO 是 [D, B, C, A, object]
+          # 从 D 之后的 [B, C, A, object] 中查找 add 方法
+          super().add(m)
+  
+          # 第七步
+          # d.n = 14
+          self.n += 5
+          # self.n = 19
+  
+  d = D()
+  d.add(2)
+  print(d.n)
+  ```
+
+  调用过程图如下:
+
+  ```
+  D.mro() == [D, B, C, A, object]
+  d = D()
+  d.n == 5
+  d.add(2)
+  
+  class D(B, C):          class B(A):            class C(A):             class A:
+      def add(self, m):       def add(self, m):      def add(self, m):       def add(self, m):
+          super().add(m)  1.--->  super().add(m) 2.--->  super().add(m)  3.--->  self.n += m
+          self.n += 5   <------6. self.n += 3    <----5. self.n += 4     <----4. <--|
+          (14+5=19)               (11+3=14)              (7+4=11)                (5+2=7)
+  ```
+
+  ![img](http://www.runoob.com/wp-content/uploads/2018/02/superdetail.png)
+
+现在你知道为什么 d.add(2) 后 d.n 的值是 19 了吧 ;)
+
+##  scipy.spatial.distance
+
+`计算两个集合之间的距离`
+
+- Function Reference
+
+Distance matrix computation from a collection of raw observation vectors stored in a rectangular array.
+
+| [`pdist`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.pdist.html#scipy.spatial.distance.pdist)(X[, metric]) | Pairwise distances between observations in n-dimensional space. |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [`cdist`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.cdist.html#scipy.spatial.distance.cdist)(XA, XB[, metric]) | Compute distance between each pair of the two collections of inputs. |
+| [`squareform`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.squareform.html#scipy.spatial.distance.squareform)(X[, force, checks]) | Convert a vector-form distance vector to a square-form distance matrix, and vice-versa. |
+| [`directed_hausdorff`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.directed_hausdorff.html#scipy.spatial.distance.directed_hausdorff)(u, v[, seed]) | Compute the directed Hausdorff distance between two N-D arrays. |
+
+Predicates for checking the validity of distance matrices, both condensed and redundant. Also contained in this module are functions for computing the number of observations in a distance matrix.
+
+| [`is_valid_dm`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.is_valid_dm.html#scipy.spatial.distance.is_valid_dm)(D[, tol, throw, name, warning]) | Return True if input array is a valid distance matrix.       |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [`is_valid_y`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.is_valid_y.html#scipy.spatial.distance.is_valid_y)(y[, warning, throw, name]) | Return True if the input array is a valid condensed distance matrix. |
+| [`num_obs_dm`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.num_obs_dm.html#scipy.spatial.distance.num_obs_dm)(d) | Return the number of original observations that correspond to a square, redundant distance matrix. |
+| [`num_obs_y`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.num_obs_y.html#scipy.spatial.distance.num_obs_y)(Y) | Return the number of original observations that correspond to a condensed distance matrix. |
+
+Distance functions between two numeric vectors `u` and `v`. Computing distances over a large collection of vectors is inefficient for these functions. Use `pdist` for this purpose.
+
+| [`braycurtis`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.braycurtis.html#scipy.spatial.distance.braycurtis)(u, v[, w]) | Compute the Bray-Curtis distance between two 1-D arrays.     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [`canberra`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.canberra.html#scipy.spatial.distance.canberra)(u, v[, w]) | Compute the Canberra distance between two 1-D arrays.        |
+| [`chebyshev`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.chebyshev.html#scipy.spatial.distance.chebyshev)(u, v[, w]) | Compute the Chebyshev distance.                              |
+| [`cityblock`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.cityblock.html#scipy.spatial.distance.cityblock)(u, v[, w]) | Compute the City Block (Manhattan) distance.                 |
+| [`correlation`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.correlation.html#scipy.spatial.distance.correlation)(u, v[, w, centered]) | Compute the correlation distance between two 1-D arrays.     |
+| [`cosine`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.cosine.html#scipy.spatial.distance.cosine)(u, v[, w]) | Compute the Cosine distance between 1-D arrays.              |
+| [`euclidean`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.euclidean.html#scipy.spatial.distance.euclidean)(u, v[, w]) | Computes the Euclidean distance between two 1-D arrays.      |
+| [`mahalanobis`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.mahalanobis.html#scipy.spatial.distance.mahalanobis)(u, v, VI) | Compute the Mahalanobis distance between two 1-D arrays.     |
+| [`minkowski`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.minkowski.html#scipy.spatial.distance.minkowski)(u, v[, p, w]) | Compute the Minkowski distance between two 1-D arrays.       |
+| [`seuclidean`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.seuclidean.html#scipy.spatial.distance.seuclidean)(u, v, V) | Return the standardized Euclidean distance between two 1-D arrays. |
+| [`sqeuclidean`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.sqeuclidean.html#scipy.spatial.distance.sqeuclidean)(u, v[, w]) | Compute the squared Euclidean distance between two 1-D arrays. |
+| [`wminkowski`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.wminkowski.html#scipy.spatial.distance.wminkowski)(u, v, p, w) | Compute the weighted Minkowski distance between two 1-D arrays. |
+
+Distance functions between two boolean vectors (representing sets) `u` and `v`. As in the case of numerical vectors, `pdist` is more efficient for computing the distances between all pairs.
+
+| [`dice`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.dice.html#scipy.spatial.distance.dice)(u, v[, w]) | Compute the Dice dissimilarity between two boolean 1-D arrays. |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [`hamming`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.hamming.html#scipy.spatial.distance.hamming)(u, v[, w]) | Compute the Hamming distance between two 1-D arrays.         |
+| [`jaccard`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.jaccard.html#scipy.spatial.distance.jaccard)(u, v[, w]) | Compute the Jaccard-Needham dissimilarity between two boolean 1-D arrays. |
+| [`kulsinski`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.kulsinski.html#scipy.spatial.distance.kulsinski)(u, v[, w]) | Compute the Kulsinski dissimilarity between two boolean 1-D arrays. |
+| [`rogerstanimoto`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.rogerstanimoto.html#scipy.spatial.distance.rogerstanimoto)(u, v[, w]) | Compute the Rogers-Tanimoto dissimilarity between two boolean 1-D arrays. |
+| [`russellrao`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.russellrao.html#scipy.spatial.distance.russellrao)(u, v[, w]) | Compute the Russell-Rao dissimilarity between two boolean 1-D arrays. |
+| [`sokalmichener`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.sokalmichener.html#scipy.spatial.distance.sokalmichener)(u, v[, w]) | Compute the Sokal-Michener dissimilarity between two boolean 1-D arrays. |
+| [`sokalsneath`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.sokalsneath.html#scipy.spatial.distance.sokalsneath)(u, v[, w]) | Compute the Sokal-Sneath dissimilarity between two boolean 1-D arrays. |
+| [`yule`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.yule.html#scipy.spatial.distance.yule)(u, v[, w]) | Compute the Yule dissimilarity between two boolean 1-D arrays. |
+
+[`hamming`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.hamming.html#scipy.spatial.distance.hamming) also operates over discrete numerical vectors.
+
+## python  \__getattr__
+
+当调用类中未定义的属性或方法时，采用__getattr__可以防止出现错误
+
+```
+1.__getattr__示例： 
+class Test(object):
+  def __init__(self,name):
+    self.name = name
+  def __getattr__(self, value):
+    if value == 'address':
+      return 'China'
+ 
+if __name__=="__main__":
+  test = Test('letian')
+  print test.name
+  print test.address
+  test.address = 'Anhui'
+  print test.address
+运行结果： 
+letian
+China
+Anhui
+如果是调用了一个类中未定义的方法，则__getattr__也要返回一个方法，例如： 
+
+class Test(object):
+  def __init__(self,name):
+    self.name = name
+  def __getattr__(self, value):
+    return len
+ 
+if __name__=="__main__":
+  test = Test('letian')
+  print test.getlength('letian')
+运行结果： 
+6
+2.__getattribute__示例： 
+class Test(object):
+  def __init__(self,name):
+    self.name = name
+  def __getattribute__(self, value):
+    if value == 'address':
+      return 'China'
+    
+if __name__=="__main__":
+  test = Test('letian')
+  print test.name
+  print test.address
+  test.address = 'Anhui'
+  print test.address
+运行结果： 
+
+None
+China
+China
+```
+
+# Gym源码阅读
+
+## Discrete类
+
+```
+
+import numpy as np
+import gym
+
+class Discrete(gym.Space):
+    """
+    {0,1,...,n-1}
+
+    Example usage:
+    self.observation_space = spaces.Discrete(2)
+    """
+    def __init__(self, n):
+        self.n = n
+        gym.Space.__init__(self, (), np.int64)
+    def sample(self):
+        return gym.spaces.np_random.randint(self.n)
+    def contains(self, x):
+        if isinstance(x, int):
+            as_int = x
+        elif isinstance(x, (np.generic, np.ndarray)) and (x.dtype.kind in np.typecodes['AllInteger'] and x.shape == ()):
+            as_int = int(x)
+        else:
+            return False
+        return as_int >= 0 and as_int < self.n
+    def __repr__(self):
+        return "Discrete(%d)" % self.n
+    def __eq__(self, other):
+        return self.n == other.n
+```
+
+
+
 # TensorFlow源码阅读-函数说明
 
->  说明：1)主要记录平时遇到的tf函数，并且对函数的功能进行简单说明，举出相应的示例理解。
+>  **说明：**1)主要记录平时遇到的tf函数，并且对函数的功能进行简单说明，举出相应的示例理解。
 >
->              2)numpy函数以及相关python3相关函数说明
+>  ​	    2)numpy函数以及相关python3相关函数说明
 
 ## tf.ConfigProto()
 
