@@ -2,7 +2,7 @@
 
 # Python基本函数
 
-## Python类中方法介绍
+## 1、Python类中方法介绍
 
 python类中方法：
 
@@ -28,9 +28,7 @@ class Test(object):
 | 类方法   | 可以通过类名和实例来调用 | 可访问类属性，无法访问实例属性                 |
 | 静态方法 | 可以通过类名和实例来调用 | 无法访问类属性及实例属性（仅可通过传值的方式） |
 
-
-
-## python3 zip()函数
+## 2、python3 zip()函数
 
 **zip()** 函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的对象，这样做的好处是节约了不少的内存。
 
@@ -114,7 +112,7 @@ np.ones(s)
            [ 1.,  1.]])
 ```
 
-## np.stack()
+## 3、np.stack()
 
 ```
 stack(arrays, axis=0, out=None)
@@ -174,7 +172,7 @@ np.stack((a, b), axis=-1)
 
 - **9) os.path.join()**
 
-## os.makedirs()
+## 4、os.makedirs()
 
 os.mkdirs()-os.makedirs()-os.rmdir()-os.removedirs()
 
@@ -190,7 +188,7 @@ os.mkdirs()-os.makedirs()-os.rmdir()-os.removedirs()
           os.makedirs(monitor_path)
 ```
 
-## numpy.append() 里的axis的用法
+## 5、numpy.append() 里的axis
 
 ```
 def append(arr, values, axis=None):
@@ -260,7 +258,7 @@ print(c)
 
 
 
-## python random.seed()函数
+## 6、python random.seed()函数
 
 描述：**seed()** 方法改变随机数生成器的种子，可以在调用其他随机模块函数之前调用此函数。。
 
@@ -307,7 +305,7 @@ Random number with seed 10 :  0.57140259469
 
 **返回：**产生均值为0，方差为1，维度为n的标准正太分布。
 
-## lambda匿名函数
+## 7、lambda匿名函数
 
 python 使用 lambda 来创建匿名函数。
 
@@ -343,7 +341,7 @@ print "相加后的值为 : ", sum( 20, 20 )
 相加后的值为 :  40
 ```
 
-## python  collections()
+## 8、python  collections()
 
 collections是Python内建的一个集合模块，提供了许多有用的集合类。
 
@@ -444,7 +442,7 @@ deque(['y', 'a', 'b', 'c', 'x'])
 
 `deque`除了实现list的`append()`和`pop()`外，还支持`appendleft()`和`popleft()`，这样就可以非常高效地往头部添加或删除元素。
 
-## numpy.expand_dims()
+## 9、numpy.expand_dims()
 
 ```
 numpy.expand_dims¶
@@ -499,7 +497,7 @@ True
 
 ```
 
-## python @property
+## 10、python @property
 
 > **作用：**将（类中）方法转换成属性来进行调用，可以进行读取数据。如果只有@property，则该属性为只读属性。如果加上@***（方法名，或者说属性名）.setter则该属性为可以修改，并且定义的方法可以进行类型检查，及时检测错误。
 
@@ -600,7 +598,7 @@ class Student(object):
 
 `@property`广泛应用在类的定义中，可以让调用者写出简短的代码，同时保证对参数进行必要的检查，这样，程序运行时就减少了出错的可能性。
 
-## python numpy.logaddexp()
+## 11、python numpy.logaddexp()
 
 Logarithm of the sum of exponentiations of the inputs.
 
@@ -626,7 +624,7 @@ Calculates `log(exp(x1) + exp(x2))`. This function is useful in statistics where
 3.5000000000000057e-50
  ```
 
-## Python super 详解
+## 12、Python super 详解
 
 说到 super， 大家可能觉得很简单呀，不就是用来调用父类方法的嘛。如果真的这么简单的话也就不会有这篇文章了，且听我细细道来。
 
@@ -938,7 +936,7 @@ self is <__main__.D object at 0x10ce10e48> @A.add
 
 现在你知道为什么 d.add(2) 后 d.n 的值是 19 了吧 ;)
 
-##  scipy.spatial.distance
+##  13、scipy.spatial.distance
 
 `计算两个集合之间的距离`
 
@@ -991,7 +989,7 @@ Distance functions between two boolean vectors (representing sets) `u` and `v`. 
 
 [`hamming`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.hamming.html#scipy.spatial.distance.hamming) also operates over discrete numerical vectors.
 
-## python  \__getattr__
+## 14、python  \__getattr__
 
 当调用类中未定义的属性或方法时，采用__getattr__可以防止出现错误
 
@@ -1048,12 +1046,171 @@ China
 China
 ```
 
-# Gym源码阅读
+## 15、Python isinstance() 函数
 
-## Discrete类
+`描述`
+
+isinstance() 函数来判断一个对象是否是一个已知的类型，类似 type()。
+
+> isinstance() 与 type() 区别：
+>
+> - type() 不会认为子类是一种父类类型，不考虑继承关系。
+> - isinstance() 会认为子类是一种父类类型，考虑继承关系。
+>
+> 如果要判断两个类型是否相同推荐使用 isinstance()。
+
+`语法`
+
+以下是 isinstance() 方法的语法:
 
 ```
+isinstance(object, classinfo)
+```
 
+`参数`
+
+- object -- 实例对象。
+
+- classinfo -- 可以是直接或间接类名、基本类型或者由它们组成的元组。
+
+  ` 返回`
+
+如果对象的类型与参数二的类型（classinfo）相同则返回 True，否则返回 False。。
+
+- 实例
+
+以下展示了使用 isinstance 函数的实例：
+
+```
+>>>a = 2
+>>> isinstance (a,int)
+True
+>>> isinstance (a,str)
+False
+>>> isinstance (a,(str,int,list))    # 是元组中的一个返回 True
+True
+```
+
+- type() 与 isinstance()区别：
+
+```
+class A:
+    pass
+ 
+class B(A):
+    pass
+ 
+isinstance(A(), A)    # returns True
+type(A()) == A        # returns True
+isinstance(B(), A)    # returns True
+type(B()) == A        # returns False
+```
+
+## 16、python all()/any()
+
+**描述：**all() 函数用于判断给定的可迭代参数 iterable 中的所有元素是否都为 TRUE，如果是返回 True，否则返回 False。元素除了是 0、空、FALSE 外都算 TRUE。
+
+函数等价于：
+
+```
+def all(iterable):
+    for element in iterable:
+        if not element:
+            return False
+    return True
+```
+
+- 语法
+
+以下是 all() 方法的语法:
+
+```
+all(iterable)
+```
+
+参数
+
+- iterable -- 元组或列表。
+
+**返回值**
+
+如果iterable的所有元素不为0、''、False或者iterable为空，all(iterable)返回True，否则返回False；
+
+**注意：**空元组、空列表返回值为True，这里要特别注意。
+
+```
+>>>all(['a', 'b', 'c', 'd'])  # 列表list，元素都不为空或0
+True
+>>> all(['a', 'b', '', 'd'])   # 列表list，存在一个为空的元素
+False
+>>> all([0, 1，2, 3])          # 列表list，存在一个为0的元素
+False
+   
+>>> all(('a', 'b', 'c', 'd'))  # 元组tuple，元素都不为空或0
+True
+>>> all(('a', 'b', '', 'd'))   # 元组tuple，存在一个为空的元素
+False
+>>> all((0, 1, 2, 3))          # 元组tuple，存在一个为0的元素
+False
+   
+>>> all([])             # 空列表
+True
+>>> all(())             # 空元组
+True
+```
+
+- **any()**
+
+**any**(...)
+
+>  any(iterable) -> bool
+>
+> Return True if bool(x) is True for any x in the iterable.
+>
+> ​    If the iterable is empty, return False.
+>
+> any(iterable)
+>
+> 说明：参数iterable：可迭代对象；
+
+如果当iterable所有的值都是0、''或False时，那么结果为False，如果所有元素中有一个值非0、''或False，那么结果就为True。只要有一个元素值非0、False、空的话那么返回的就是True.
+
+函数等价于：
+
+```
+def any(iterable):
+   for element in iterable:
+       if  element:
+           return False
+   return True
+```
+
+示例如下：
+
+```
+>>> any(['a', 'b', 'c', 'd'])  #列表list，元素都不为空或0
+True
+>>> any(['a', 'b', '', 'd'])  #列表list，存在一个为空的元素
+True
+>>> any([0, '', False])  #列表list,元素全为0,'',false
+False
+>>> any(('a', 'b', 'c', 'd'))  #元组tuple，元素都不为空或0
+True
+>>> any(('a', 'b', '', 'd'))  #元组tuple，存在一个为空的元素
+True
+>>> any((0, '', False))  #元组tuple，元素全为0,'',false
+False
+>>> any([]) # 空列表
+False
+>>> any(()) # 空元组
+False
+```
+
+# Gym源码阅读
+
+## 1、Discrete类
+
+```
 import numpy as np
 import gym
 
@@ -1083,6 +1240,31 @@ class Discrete(gym.Space):
         return self.n == other.n
 ```
 
+## 2、MultiDiscrete类
+
+```
+import gym
+import numpy as np
+
+class MultiDiscrete(gym.Space):
+    def __init__(self, nvec):
+        """
+        nvec: vector of counts of each categorical variable
+        """
+        self.nvec = np.asarray(nvec, dtype=np.int32)
+        assert self.nvec.ndim == 1, 'nvec should be a 1d array (or list) of ints'
+        gym.Space.__init__(self, (self.nvec.size,), np.int8)
+    def sample(self):
+        return (gym.spaces.np_random.rand(self.nvec.size) * self.nvec).astype(self.dtype)
+    def contains(self, x):
+        return (x < self.nvec).all() and x.dtype.kind in 'ui'
+    def to_jsonable(self, sample_n):
+        return [sample.tolist() for sample in sample_n]
+    def from_jsonable(self, sample_n):
+        return np.array(sample_n)
+
+```
+
 
 
 # TensorFlow源码阅读-函数说明
@@ -1091,7 +1273,7 @@ class Discrete(gym.Space):
 >
 >  ​	    2)numpy函数以及相关python3相关函数说明
 
-## tf.ConfigProto()
+## 1、tf.ConfigProto()
 
 `tf.ConfigProto`一般用在创建`session`的时候。用来对`session`进行参数配置
 
@@ -1131,7 +1313,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0' #使用 GPU 0
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1' # 使用 GPU 0，1
 ```
 
-##  tf.placeholder()
+##  2、tf.placeholder()
 
 ```
 tf.placeholder 函数
@@ -1200,7 +1382,7 @@ with tf.Session() as sess:
      print(sess.run(output, feed_dict = {input1:[7.],input2: [2.]}))
 ```
 
-## tf.contrib层
+## 3、tf.contrib层
 
 由 Carrie 创建， 最后一次修改 2017-08-22
 
@@ -1302,7 +1484,7 @@ stack 操作也可用，它通过重复应用层来构建一叠层。
 - [tf.contrib.layers.infer_real_valued_columns](https://www.tensorflow.org/api_docs/python/tf/contrib/layers/infer_real_valued_columns)
 - [tf.contrib.layers.sequence_input_from_feature_columns](https://www.tensorflow.org/api_docs/python/tf/contrib/layers/sequence_input_from_feature_columns)
 
-##  tf.contrib.layers.conv2d()
+##  4、tf.contrib.layers.conv2d()
 
 说明：定义卷积层
 
@@ -1358,7 +1540,7 @@ def convolution(inputs,
 
  
 
-## tf.contrib.layers.fully_connected()
+## 5、tf.contrib.layers.fully_connected
 
 说明：定义全连接层
 
@@ -1531,7 +1713,7 @@ for step in range(training_step):
 
 
 
-## tf.variable_scope()官方定义
+## 6、tf.variable_scope()官方定义
 
 定义在：[tensorflow/python/ops/variable_scope.py](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-hbaz2o9y.html)
 
@@ -1608,7 +1790,7 @@ class variable_scope(object):
   False as reuse has exactly the same effect.
   """
 
-## tf.variable_scope()-1
+## 7、tf.variable_scope()-1
 
 **tensorflow 为了更好的管理变量,提供了variable scope机制** 
 **官方解释:** 
@@ -1737,7 +1919,7 @@ with tf.variable_scope("level1", reuse=True): #即使嵌套的variable_scope也�
 `tf.get_variable_scope()` :获取当前scope 
 `tf.get_variable_scope().reuse_variables()` 共享变量
 
-## tf.variable_scope()-2
+## 8、tf.variable_scope()-2
 
 variable_scope类
 
@@ -1883,7 +2065,7 @@ __exit__(
 )
 ```
 
-## tf.get_variable()
+## 9、tf.get_variable()
 
 由 Carrie 创建， 最后一次修改 2017-10-24
 
@@ -1950,7 +2132,7 @@ with tf.variable_scope("foo", reuse=True):
 
 - ValueError：当创建新的变量和形状时，在变量创建时违反重用，或当 initializer 的 dtype 和 dtype 不匹配时。在 variable_scope 中设置重用。
 
-## tf.reshape函数重塑张量
+## 10、tf.reshape函数重塑张量
 
 由 Carrie 创建， 最后一次修改 2017-12-23
 
@@ -2030,7 +2212,7 @@ reshape(t, []) ==> 7
 
 该操作返回一个Tensor。与tensor具有相同的类型。
 
-## tf.train.ExponentialMovingAverage
+## 11、tf.train.ExponentialMovingAverage
 
 Some training algorithms, such as GradientDescent and Momentum often benefit from maintaining a moving average of variables during optimization. Using the moving averages for evaluations often improve results significantly. 
 `tensorflow` 官网上对于这个方法功能的介绍。`GradientDescent` 和 `Momentum` 方式的训练 都能够从 `ExponentialMovingAverage` 方法中获益。
@@ -2195,7 +2377,7 @@ saver.restore(...checkpoint filename...)12345
 
 <https://www.tensorflow.org/versions/master/api_docs/python/train/moving_averages>
 
-## tf.get_collection()
+## 12、tf.get_collection()
 
 > 从一个结合中取出全部变量，是一个列表;
 >
@@ -2257,7 +2439,7 @@ get_collection_ref(key)
 | `tf.GraphKeys.QUEUE_RUNNERS`            | 处理输入的QueueRunner                | 输入处理                     |
 | `tf.GraphKeys.MOVING_AVERAGE_VARIABLES` | 所有计算了滑动平均值的变量           | 计算变量的滑动平均值         |
 
-## tf.Variables
+## 13、tf.Variables
 
 - 引言
 
@@ -2432,7 +2614,7 @@ saver = tf.train.Saver({"my_v2": v2})
 ...12345678
 ```
 
-## tf.summary.merge_all
+## 14、tf.summary.merge_all
 
 - tf.summary模块的简介
 
@@ -2468,7 +2650,7 @@ def get_summary_description(node_def)
 
 ```
 
-## tf.summary.scalar
+## 15、tf.summary.scalar
 
 ```
 #========================================================================================================
@@ -2491,7 +2673,7 @@ def get_summary_description(node_def)
 
 ```
 
-## tf.summary.image
+## 16、tf.summary.image
 
 ```
 #========================================================================================================
@@ -2522,7 +2704,7 @@ def get_summary_description(node_def)
 
 
 
-## tf.summary.FileWriter
+## 17、tf.summary.FileWriter
 
 ```
 #========================================================================================================
@@ -2545,7 +2727,7 @@ def get_summary_description(node_def)
 
 ```
 
-## tf.summary.FileWriter.add_summary
+## 18、tf.summary.FileWriter.add_summary
 
 ```
 #==================================================================================================
@@ -2563,7 +2745,7 @@ def get_summary_description(node_def)
 #==================================================================================================
 ```
 
-## tf.image.rgb_to_grayscale
+## 19、tf.image.rgb_to_grayscale
 
 定义在：[tensorflow/python/ops/image_ops_impl.py](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-ats62pzl.html)。
 
@@ -2612,7 +2794,7 @@ def rgb_to_grayscale(images, name=None):
 
 ```
 
-## tf.squeeze函数
+## 20、tf.squeeze函数
 
 ```
 squeeze(
@@ -2660,7 +2842,7 @@ tf.shape(tf.squeeze(t, [2, 4]))  # [1, 2, 3, 1]
 
 - ValueError：当两个squeeze_dims和axis指定。
 
-## tf.set_random_seed 函数
+## 21、tf.set_random_seed 函数
 
 ```
 set_random_seed(seed)
