@@ -1108,7 +1108,11 @@ type(B()) == A        # returns False
 
 ## 16、python all()/any()
 
-**描述：**all() 函数用于判断给定的可迭代参数 iterable 中的所有元素是否都为 TRUE，如果是返回 True，否则返回 False。元素除了是 0、空、FALSE 外都算 TRUE。
+> **描述：**all() 函数用于判断给定的可迭代参数 iterable 中的所有元素是否都为 TRUE，如果是返回 True，
+>
+> 否则返回 False。元素除了是 0、空、FALSE 外都算 TRUE。
+
+
 
 函数等价于：
 
@@ -1205,6 +1209,40 @@ False
 >>> any(()) # 空元组
 False
 ```
+
+## 17、numpy.dtype.kind
+
+```
+numpy.dtype.kind
+
+dtype.kind
+A character code (one of ‘biufcmMOSUV’) identifying the general kind of data.
+
+b	boolean
+i	signed integer
+u	unsigned integer
+f	floating-point
+c	complex floating-point
+m	timedelta
+M	datetime
+O	object
+S	(byte-)string
+U	Unicode
+V	voids
+```
+
+实例如下：
+
+```
+import numpy as np
+np.asarray([1,5]).dtype.kind
+Out[129]: 'i'
+
+np.asarray([1,5]).dtype
+Out[130]: dtype('int32')
+```
+
+
 
 # Gym源码阅读
 
