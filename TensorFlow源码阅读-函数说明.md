@@ -28,7 +28,11 @@ class Test(object):
 | 类方法   | 可以通过类名和实例来调用 | 可访问类属性，无法访问实例属性                 |
 | 静态方法 | 可以通过类名和实例来调用 | 无法访问类属性及实例属性（仅可通过传值的方式） |
 
+<<<<<<< Updated upstream
 ## 2、python3 zip()函数
+=======
+## python3 zip()函数
+>>>>>>> Stashed changes
 
 **zip()** 函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的对象，这样做的好处是节约了不少的内存。
 
@@ -497,6 +501,7 @@ True
 
 ```
 
+<<<<<<< Updated upstream
 ## 10、python @property
 
 > **作用：**将（类中）方法转换成属性来进行调用，可以进行读取数据。如果只有@property，则该属性为只读属性。如果加上@***（方法名，或者说属性名）.setter则该属性为可以修改，并且定义的方法可以进行类型检查，及时检测错误。
@@ -1171,7 +1176,7 @@ True
 >
 > Return True if bool(x) is True for any x in the iterable.
 >
-> ​    If the iterable is empty, return False.
+>     If the iterable is empty, return False.
 >
 > any(iterable)
 >
@@ -1242,7 +1247,435 @@ np.asarray([1,5]).dtype
 Out[130]: dtype('int32')
 ```
 
+## 18、os和sys模块
 
+`sys模块`
+
+sys模块主要是用于提供对**python解释器相关的操作**
+
+`函数`
+
+- sys.argv #命令行参数List，第一个元素是程序本身路径
+- sys.path #返回模块的搜索路径，初始化时使用PYTHONPATH环境变量的值
+- sys.modules.keys() #返回所有已经导入的模块列表
+- sys.modules #返回系统导入的模块字段，key是模块名，value是模块
+- sys.exc_info() #获取当前正在处理的异常类,exc_type、exc_value、exc_traceback当前处理的异常详细信息
+- sys.exit(n) #退出程序，正常退出时exit(0)
+- sys.hexversion #获取Python解释程序的版本值，16进制格式如：0x020403F0
+- sys.version #获取Python解释程序的版本信息
+- sys.platform #返回操作系统平台名称
+- sys.maxint # 最大的Int值
+- sys.stdout #标准输出
+- sys.stdout.write('aaa') #标准输出内容
+- sys.stdout.writelines() #无换行输出
+- sys.stdin #标准输入
+- sys.stdin.read() #输入一行
+- sys.stderr #错误输出
+- sys.exc_clear() #用来清除当前线程所出现的当前的或最近的错误信息
+- sys.exec_prefix #返回平台独立的python文件安装的位置
+- sys.byteorder #本地字节规则的指示器，big-endian平台的值是'big',little-endian平台的值是'little'
+- sys.copyright #记录python版权相关的东西
+- sys.api_version #解释器的C的API版本
+- sys.version_info #'final'表示最终,也有'candidate'表示候选，表示版本级别，是否有后继的发行
+- sys.getdefaultencoding() #返回当前你所用的默认的字符编码格式
+- sys.getfilesystemencoding() #返回将Unicode文件名转换成系统文件名的编码的名字
+- sys.builtin_module_names #Python解释器导入的内建模块列表
+- sys.executable #Python解释程序路径
+- sys.getwindowsversion() #获取Windows的版本
+- sys.stdin.readline() #从标准输入读一行，sys.stdout.write(a) 屏幕输出a
+- sys.setdefaultencoding(name) #用来设置当前默认的字符编码(详细使用参考文档)
+- sys.displayhook(value) #如果value非空，这个函数会把他输出到sys.stdout(详细使用参考文档)
+
+`常用功能`
+
+[![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
+
+```
+sys.arg 获取位置参数
+print(sys.argv)
+
+执行该脚本，加参数的打印结果
+python3 m_sys.py  1 2 3 4 5
+
+['m_sys.py', '1', '2', '3', '4', '5']
+可以发现 sys.arg返回的是整个位置参数，类似于shell的$0 $1...
+sys.exit(n) 程序退出，n是退出是返回的对象
+sys.version 获取python版本
+>>> sys.version
+'3.5.1 (v3.5.1:37a07cee5969, Dec  5 2015, 21:12:44) \n[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)]'
+sys.path 返回模块的搜索路径列表,可通过添加自定义路径，来添加自定义模块
+>>> sys.path
+['', '/Library/Frameworks/Python.framework/Versions/3.5/lib/python35.zip', '/Library/Frameworks/Python.framework/Versions/3.5/lib/python3.5', '/Library/Frameworks/Python.framework/Versions/3.5/lib/python3.5/plat-darwin', '/Library/Frameworks/Python.framework/Versions/3.5/lib/python3.5/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.5/lib/python3.5/site-packages']
+
+sys.platform 返回当前系统平台 linux平台返回linux，windows平台返回win32，MAC返回darwin
+>>> sys.platform
+'darwin
+sys.stdout.write() 输出内容
+>>> sys.stdout.write('asd')
+asd3
+>>> sys.stdout.write('asd')
+asd3
+>>> sys.stdout.write('as')
+as2
+
+```
+
+[![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
+
+ 
+
+`应用：`
+
+进度条：
+
+[![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
+
+```
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+#pyversion:python3.5
+#owner:fuzj
+
+
+"""
+sys 和python解析器相关
+"""
+
+import sys
+import time
+
+
+
+def view_bar(num,total):
+
+    rate = num / total
+    rate_num =  int(rate * 100)
+    #r = '\r %d%%' %(rate_num)
+    r = '\r%s>%d%%' % ('=' * rate_num, rate_num,)
+    sys.stdout.write(r)
+    sys.stdout.flush
+
+
+if __name__ == '__main__':
+    for i in range(0, 101):
+        time.sleep(0.1)
+        view_bar(i, 100)
+效果：
+
+====================================================================================================>100%
+
+```
+
+[![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
+
+ 
+
+`os模块`
+
+OS模块是Python标准库中的一个用于**访问操作系统功能的模块，**使用OS模块中提供的接口，可以实现跨平台访问
+
+`用于提供系统级别的操作`
+
+- os.getcwd() 获取当前工作目录，即当前python脚本工作的目录路径
+- os.chdir(dirname) 改变当前脚本工作目录；相当于shell下cd
+- os.curdir 返回当前目录: ('.')
+- os.pardir 获取当前目录的父目录字符串名：('..')
+- os.makedirs('dir1/dir2') 可生成多层递归目录
+- os.removedirs('dirname1') 若目录为空，则删除，并递归到上一级目录，如若也为空，则删除，依此类推
+- os.mkdir('dirname') 生成单级目录；相当于shell中mkdir dirname
+- os.rmdir('dirname') 删除单级空目录，若目录不为空则无法删除，报错；相当于shell中rmdir dirname
+- os.listdir('dirname') 列出指定目录下的所有文件和子目录，包括隐藏文件，并以列表方式打印
+- os.remove() 删除一个文件
+- os.rename(oldname,new) 重命名文件/目录
+- os.stat('path/filename') 获取文件/目录信息
+- os.sep 操作系统特定的路径分隔符，win下为\,Linux下为/
+- os.linesep 当前平台使用的行终止符，win下为\t\n,Linux下为\n
+- os.pathsep 用于分割文件路径的字符串
+- os.name 字符串指示当前使用平台。win->'nt'; Linux->'posix'
+- os.system(bash command) 运行shell命令，直接显示
+- os.environ 获取系统环境变量
+- os.path.abspath(path) 返回path规范化的绝对路径
+- os.path.split(path) 将path分割成目录和文件名二元组返回
+- os.path.dirname(path) 返回path的目录。其实就是os.path.split(path)的第一个元素
+- os.path.basename(path) 返回path最后的文件名。如何path以／或\结尾，那么就会返回空值。即os.path.split(path)的第二个元素
+- os.path.exists(path) 如果path存在，返回True；如果path不存在，返回False
+- os.path.lexists  #路径存在则返回True,路径损坏也返回True
+- os.path.isabs(path) 如果path是绝对路径，返回True
+- os.path.isfile(path) 如果path是一个存在的文件，返回True。否则返回False
+- os.path.isdir(path) 如果path是一个存在的目录，则返回True。否则返回False
+- os.path.join(path1[, path2[, ...]]) 将多个路径组合后返回，第一个绝对路径之前的参数将被忽略
+- os.path.getatime(path) 返回path所指向的文件或者目录的最后存取时间
+- os.path.getmtime(path) 返回path所指向的文件或者目录的最后修改时间
+- os.path.commonprefix(list) #返回list(多个路径)中，所有path共有的最长的路径。
+- os.path.expanduser(path)  #把path中包含的"~"和"~user"转换成用户目录
+- os.path.expandvars(path)  #根据环境变量的值替换path中包含的”$name”和”${name}”
+- os.access('pathfile',os.W_OK) 检验文件权限模式，输出True，False
+- os.chmod('pathfile',os.W_OK) 改变文件权限模式
+
+## 19、eval
+
+作用：
+
+```
+   将字符串str当成有效的表达式来求值并返回计算结果。参数：source：一个Python表达式或函数compile()返回的代码对象；globals：可选。必须是dictionary；locals：可选。任意map对象。
+
+```
+
+实例：
+
+```
+#################################################
+字符串转换成列表
+>>>a = "[[1,2], [3,4], [5,6], [7,8], [9,0]]"
+>>>type(a)
+<type 'str'>
+>>> b = eval(a)
+>>> print b
+[[1, 2], [3, 4], [5, 6], [7, 8], [9, 0]]
+>>> type(b)
+<type 'list'>
+#################################################
+字符串转换成字典
+>>> a = "{1: 'a', 2: 'b'}"
+>>> type(a)
+<type 'str'>
+>>> b = eval(a)
+>>> print b
+{1: 'a', 2: 'b'}
+>>> type(b)
+<type 'dict'>
+#################################################
+字符串转换成元组
+>>> a = "([1,2], [3,4], [5,6], [7,8], (9,0))"
+>>> type(a)
+<type 'str'>
+>>> b = eval(a)
+>>> print b
+([1, 2], [3, 4], [5, 6], [7, 8], (9, 0))
+>>> type(b)
+<type 'tuple'>
+
+```
+
+## 20、defaultdict()函数
+
+当我使用普通的字典时，用法一般是dict={},添加元素的只需要dict[element] =value即，调用的时候也是如此，dict[element] = xxx,但前提是element字典里，如果不在字典里就会报错，如： 
+
+这时defaultdict就能排上用场了，defaultdict的作用是在于，当字典里的key不存在但被查找时，返回的不是keyError而是一个默认值，这个默认值是什么呢，下面会说
+
+如何使用defaultdict
+defaultdict接受一个工厂函数作为参数，如下来构造：
+
+`dict =defaultdict( factory_function)`
+
+这个factory_function可以是list、set、str等等，作用是当key不存在时，返回的是工厂函数的默认值，比如list对应[ ]，str对应的是空字符串，set对应set( )，int对应0，如下举例：
+
+```
+from collections import defaultdict
+
+dict1 = defaultdict(int)
+dict2 = defaultdict(set)
+dict3 = defaultdict(str)
+dict4 = defaultdict(list)
+dict1[2] ='two'
+
+print(dict1[1])
+print(dict2[1])
+print(dict3[1])
+print(dict4[1])
+
+```
+
+输出：
+
+0
+set()
+
+[]
+
+## 21、enumerate() 函数
+
+描述
+
+enumerate() 函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据和数据下标，一般用在 for 循环当中。
+
+Python 2.3. 以上版本可用，2.6 添加 start 参数。
+
+语法
+
+以下是 enumerate() 方法的语法:
+
+```
+enumerate(sequence, [start=0])
+
+```
+
+参数
+
+- sequence -- 一个序列、迭代器或其他支持迭代对象。
+- start -- 下标起始位置。
+
+返回值
+
+返回 enumerate(枚举) 对象。
+
+实例
+
+以下展示了使用 enumerate() 方法的实例：
+
+```
+>>>seasons = ['Spring', 'Summer', 'Fall', 'Winter']
+>>>list(enumerate(seasons))
+[(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
+>>>list(enumerate(seasons, start=1))       # 下标从 1 开始
+[(1, 'Spring'), (2, 'Summer'), (3, 'Fall'), (4, 'Winter')]
+
+```
+
+
+
+普通的 for 循环
+
+```
+>>>i = 0 
+
+>>> seq = ['one', 'two', 'three'] 
+
+>>> for element in seq: 
+
+        print i, seq[i] 
+
+        i +=1 
+
+...     0 one 
+		1 two 
+		2 three
+
+```
+
+for 循环使用 enumerate
+
+```
+>>>seq = ['one', 'two', 'three']
+
+>>>for i, element in enumerate(seq): 
+
+>>>...    print i, element 
+
+0 one 
+1 two 
+2 three
+
+```
+
+## 22、@property属性介绍
+
+在绑定属性时，如果我们直接把属性暴露出去，虽然写起来很简单，但是，没办法检查参数，导致可以把成绩随便改：
+
+```
+s = Student()
+s.score = 9999
+
+```
+
+这显然不合逻辑。为了限制score的范围，可以通过一个`set_score()`方法来设置成绩，再通过一个`get_score()`来获取成绩，这样，在`set_score()`方法里，就可以检查参数：
+
+```
+class Student(object):
+
+    def get_score(self):
+        return self._score
+
+    def set_score(self, value):
+        if not isinstance(value, int):
+            raise ValueError('score must be an integer!')
+        if value < 0 or value > 100:
+            raise ValueError('score must between 0 ~ 100!')
+        self._score = value
+
+```
+
+现在，对任意的Student实例进行操作，就不能随心所欲地设置score了：
+
+```
+>>> s = Student()
+>>> s.set_score(60) # ok!
+>>> s.get_score()
+60
+>>> s.set_score(9999)
+Traceback (most recent call last):
+  ...
+ValueError: score must between 0 ~ 100!
+
+```
+
+但是，上面的调用方法又略显复杂，没有直接用属性这么直接简单。
+
+有没有既能检查参数，又可以用类似属性这样简单的方式来访问类的变量呢？对于追求完美的Python程序员来说，这是必须要做到的！
+
+还记得装饰器（decorator）可以给函数动态加上功能吗？对于类的方法，装饰器一样起作用。Python内置的`@property`装饰器就是负责把一个方法变成属性调用的：
+
+```
+class Student(object):
+
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, value):
+        if not isinstance(value, int):
+            raise ValueError('score must be an integer!')
+        if value < 0 or value > 100:
+            raise ValueError('score must between 0 ~ 100!')
+        self._score = value
+
+```
+
+`@property`的实现比较复杂，我们先考察如何使用。把一个getter方法变成属性，只需要加上`@property`就可以了，此时，`@property`本身又创建了另一个装饰器`@score.setter`，负责把一个setter方法变成属性赋值，于是，我们就拥有一个可控的属性操作：
+
+```
+>>> s = Student()
+>>> s.score = 60 # OK，实际转化为s.set_score(60)
+>>> s.score # OK，实际转化为s.get_score()
+60
+>>> s.score = 9999
+Traceback (most recent call last):
+  ...
+ValueError: score must between 0 ~ 100!
+
+```
+
+注意到这个神奇的`@property`，我们在对实例属性操作的时候，就知道该属性很可能不是直接暴露的，而是通过getter和setter方法来实现的。
+
+还可以定义只读属性，只定义getter方法，不定义setter方法就是一个只读属性：
+
+```
+class Student(object):
+
+    @property
+    def birth(self):
+        return self._birth
+
+    @birth.setter
+    def birth(self, value):
+        self._birth = value
+
+    @property
+    def age(self):
+        return 2014 - self._birth
+
+```
+
+上面的`birth`是可读写属性，而`age`就是一个**只读**属性，因为`age`可以根据`birth`和当前时间计算出来。
+
+`小结` 
+
+> > > > > > > Stashed changes
+
+`@property`广泛应用在类的定义中，可以让调用者写出简短的代码，同时保证对参数进行必要的检查，这样，程序运行时就减少了出错的可能性。
+
+# 
 
 # Gym源码阅读
 
@@ -1303,13 +1736,15 @@ class MultiDiscrete(gym.Space):
 
 ```
 
+=======
+
 
 
 # TensorFlow源码阅读-函数说明
 
 >  **说明：**1)主要记录平时遇到的tf函数，并且对函数的功能进行简单说明，举出相应的示例理解。
 >
->  ​	    2)numpy函数以及相关python3相关函数说明
+>  	    2)numpy函数以及相关python3相关函数说明
 
 ## 1、tf.ConfigProto()
 
