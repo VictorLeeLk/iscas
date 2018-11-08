@@ -30,8 +30,6 @@ class Test(object):
 
 <<<<<<< Updated upstream
 ## 2、python3 zip()函数
-=======
-## python3 zip()函数
 >>>>>>> Stashed changes
 
 **zip()** 函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的对象，这样做的好处是节约了不少的内存。
@@ -2317,6 +2315,58 @@ pdb 是 python 自带的一个包，为 python 程序提供了一种交互的源
 pdb 调试有个明显的缺陷就是对于多线程，远程调试等支持得不够好，同时没有较为直观的界面显示，不太适合大型的 python 项目。而在较大的 python 项目中，这些调试需求比较常见，因此需要使用更为高级的调试工具。接下来将介绍 PyCharm IDE 的调试方法 .
 
 ------------------------------------------------------------------
+
+## 27、Python hasattr()
+
+**描述**
+
+**hasattr()** 函数用于判断对象是否包含对应的属性。
+
+**语法**
+
+hasattr 语法：
+
+```
+hasattr(object, name)
+```
+
+**参数**
+
+- object -- 对象。
+- name -- 字符串，属性名。
+
+**返回值**
+
+如果对象有该属性返回 True，否则返回 False。
+
+**实例**
+
+以下实例展示了 hasattr 的使用方法：
+
+```
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+class Coordinate:
+    x = 10
+    y = -5
+    z = 0
+ 
+point1 = Coordinate() 
+print(hasattr(point1, 'x'))
+print(hasattr(point1, 'y'))
+print(hasattr(point1, 'z'))
+print(hasattr(point1, 'no'))  # 没有该属性
+```
+
+输出结果如下：
+
+```
+True
+True
+True
+False
+```
 
 # Gym源码阅读
 
