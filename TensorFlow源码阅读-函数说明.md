@@ -2368,6 +2368,50 @@ True
 False
 ```
 
+## 28、numpy.ceil()
+
+`numpy.ceil`(*x*, */*, *out=None*, *, *where=True*, *casting='same_kind'*, *order='K'*, *dtype=None*, *subok=True*[, *signature*, *extobj*]) *= <ufunc 'ceil'>*
+
+Return the ceiling of the input, element-wise.
+
+The ceil of the scalar *x* is the smallest integer *i*, such that *i >= x*. It is often denoted as ![\lceil x \rceil](https://docs.scipy.org/doc/numpy-1.14.0/_images/math/b19c9ec5d51014d55bfde3ec6c62e7b5fe9b129a.svg).
+
+```
+Parameters:	
+x : array_like
+
+Input data.
+
+out : ndarray, None, or tuple of ndarray and None, optional
+
+A location into which the result is stored. If provided, it must have a shape that the inputs broadcast to. If not provided or None, a freshly-allocated array is returned. A tuple (possible only as a keyword argument) must have length equal to the number of outputs.
+
+where : array_like, optional
+
+Values of True indicate to calculate the ufunc at that position, values of False indicate to leave the value in the output alone.
+
+**kwargs
+
+For other keyword-only arguments, see the ufunc docs.
+
+Returns:	
+y : ndarray or scalar
+
+The ceiling of each element in x, with float dtype.
+```
+
+
+
+```
+Examples
+
+>>> a = np.array([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0])
+>>> np.ceil(a)
+array([-1., -1., -0.,  1.,  2.,  2.,  2.])
+```
+
+
+
 # Gym源码阅读
 
 ## 1、Discrete类
@@ -4100,6 +4144,278 @@ with tf.Session() as sess2:
 函数参数
 
 - seed：整数。
+
+## 22、tf.one_hot()
+
+1. 首先解释one_hot encoding(独热编码)
+
+one_hot encoding可作为机器学习中对离散型特征的一种处理手段，一般用于处理监督学习中分类问题样本的标注数据。例如有三类特征{label1，label2，label3}，需要三个bit位实现编码，bit位为1的位置对应原来的特征值，即上述特征对应的编码为{100, 010, 001}。
+
+2.tf.one_hot( label_batch,  class_num )
+
+tf.one_hot( ) 函数原型为：
+
+one_hot(indices, depth, on_value=None, off_value=None, axis=None, dtype=None, name=None)
+**indices: **代表了on_value所在的索引，其他位置值为off_value。类型为tensor，其尺寸与depth共同决定输出tensor的尺寸。
+
+**depth：**编码深度。
+
+on_value & off_value为编码开闭值，缺省分别为1和0，indices指定的索引处为on_value值；
+
+**axis：**编码的轴，分情况可取-1、0或-1、0、1，默认为-1
+
+**dtype：**默认为 on_value 或 off_value的类型，若未提供on_value或off_value，则默认为tf.float32类型。
+
+返回一个 one-hot tensor。
+
+2. 应用
+
+(1) indices是一个标量， 输出是一个长度为‘depth’的向量；
+
+(2) indices是一个长度为features的向量，输出尺寸为：(a) 当axis==-1，features*depth  (b) 当axis==0，depth*features
+
+(3) indices是一个尺寸为[batch，features]的矩阵，输出尺寸为：
+
+    (a) 当axis==-1，batch*features*depth (b)当axis==1，batch*depth*features (c)当axis==0，depth*batch*features
+
+第(2)种情况举例：
+
+   ```python
+      indices = [0, 2, -1, 1]
+      depth = 3
+      on_value = 5.0
+      off_value = 0.0
+      axis = -1
+   ```
+
+输出尺寸为4*3，
+
+ ```
+python
+                          output =
+                          [5.0 0.0 0.0]  // one_hot(0)
+                          [0.0 0.0 5.0]  // one_hot(2)
+                          [0.0 0.0 0.0]  // one_hot(-1)
+                          [0.0 5.0 0.0]  // one_hot(1)
+ ```
+
+第(3)种情况举例：
+
+   ```python
+      indices = [[0, 2], [1, -1]]
+      depth = 3
+      on_value = 1.0
+      off_value = 0.0
+      axis = -1
+   ```
+
+输出尺寸为：2*2*3，结果：
+
+```
+python
+                                          output =
+                                          [
+                                            [1.0, 0.0, 0.0]  // one_hot(0)
+                                            [0.0, 0.0, 1.0]  // one_hot(2)
+                                          ][ [0.0, 1.0, 0.0]  // one_hot(1)
+                                            [0.0, 0.0, 0.0]  // one_hot(-1)
+                                          ]
+```
+
+
+
+3. 分类代码中标注数据的处理：
+
+onehot_label_batch = tf.one_hot(label_batch, class_num)
+
+对标签（label）数据使用one-hot vectors，label n(数字)表示成只有第n维度数字为1的class_num维向量，n为0,1...class_num-1。若有5类，class_num = 5, 标签0表示为[1, 0, 0, 0, 0]，标签1表示为[0, 1, 0, 0, 0]，以此类推。
+
+----
+
+```
+tf.one_hot 函数
+one_hot(
+    indices,
+    depth,
+    on_value=None,
+    off_value=None,
+    axis=None,
+    dtype=None,
+    name=None
+)
+```
+
+定义在：[tensorflow/python/ops/array_ops.py](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-9gip2cze.html)。
+
+参见指南：[张量变换>分割和连接](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-85v22c69.html)
+
+返回一个 one-hot 张量。 
+
+索引中由索引表示的位置取值 on_value，而所有其他位置都取值 off_value。 
+
+on_value 和 off_value必须具有匹配的数据类型。如果还提供了 dtype，则它们必须与 dtype 指定的数据类型相同。
+
+如果未提供 on_value，则默认值将为 1，其类型为 dtype。 
+
+如果未提供 off_value，则默认值为 0，其类型为 dtype。
+
+如果输入的索引的秩为 N，则输出的秩为 N+1。新的坐标轴在维度上创建 axis（默认值：新坐标轴在末尾追加）。
+
+如果索引是标量，则输出形状将是长度 depth 的向量。
+
+如果索引是长度 features 的向量，则输出形状将为：
+
+```
+features x depth if axis == -1
+depth x features if axis == 0
+```
+
+如果索引是具有形状 [batch, features] 的矩阵（批次），则输出形状将是： 
+
+```
+batch x features x depth if axis == -1
+batch x depth x features if axis == 1
+depth x batch x features if axis == 0
+```
+
+如果 dtype 没有提供，则它会尝试假定 on_value 或者 off_value 的数据类型，如果其中一个或两个都传入。如果没有提供 on_value、off_value 或 dtype，则dtype 将默认为值 tf.float32。 
+
+> 注意：如果一个非数值数据类型输出期望（tf.string，tf.bool等），都on_value与off_value 必须被提供给one_hot。
+
+**示例**
+
+- 示例-1
+
+假设如下：
+
+```
+indices = [0, 2, -1, 1]
+depth = 3
+on_value = 5.0
+off_value = 0.0
+axis = -1
+```
+
+那么输出为 [4 x 3]：
+
+```
+output =
+[5.0 0.0 0.0]  // one_hot(0)
+[0.0 0.0 5.0]  // one_hot(2)
+[0.0 0.0 0.0]  // one_hot(-1)
+[0.0 5.0 0.0]  // one_hot(1)
+```
+
+- 示例-2
+
+假设如下：
+
+```
+indices = [[0, 2], [1, -1]]
+depth = 3
+on_value = 1.0
+off_value = 0.0
+axis = -1
+```
+
+那么输出是 [2 x 2 x 3]：
+
+```
+output =
+[
+  [1.0, 0.0, 0.0]  // one_hot(0)
+  [0.0, 0.0, 1.0]  // one_hot(2)
+][
+  [0.0, 1.0, 0.0]  // one_hot(1)
+  [0.0, 0.0, 0.0]  // one_hot(-1)
+]
+```
+
+使用 on_value 和 off_value 的默认值：
+
+```
+indices = [0, 1, 2]
+depth = 3
+```
+
+输出将是：
+
+```
+output =
+[[1., 0., 0.],
+ [0., 1., 0.],
+ [0., 0., 1.]]
+```
+
+参数：
+
+- indices：指数的张量。
+- depth：一个标量，用于定义一个 one hot 维度的深度。 
+- on_value：定义在 indices[j] = i 时填充输出的值的标量。（默认：1）
+- off_value：定义在 indices[j] != i 时填充输出的值的标量。（默认：0）
+- axis：要填充的轴（默认：-1，一个新的最内层轴）。
+- dtype：输出张量的数据类型。
+
+返回值：
+
+- output： one-hot 张量。
+
+可能引发的异常：
+
+- TypeError：如果 on_value 或者 off_value 的类型不匹配 dtype。
+- TypeError：如果 on_value 和 off_value 的 dtype 不匹配。
+
+##  23、tf.log()
+
+```
+函数：tf.log
+log(
+    x,
+    name=None
+)
+```
+
+参考指南：[数学函数>基本数学函数](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-u7wa28vm.html) 
+
+计算元素 x 的自然对数。 
+
+例如：
+
+$y=\log_ex$ 
+
+参数：
+
+- x：张量，必须是下列类型之一：half，float32，float64，complex64，complex128， 。
+- name：操作的名称（可选）。
+
+返回值：
+
+该函数返回一个张量，与 x 具有相同的类型。
+
+```
+函数：tf.log1p
+log1p(
+    x,
+    name=None
+)
+```
+
+参考指南：[数学函数>基本数学函数](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-u7wa28vm.html) 
+
+计算（1 + x）元素的自然对数。
+
+例如：
+
+$ y = \log_e (1 + x)$  
+
+参数：
+
+- x：张量，必须是下列类型之一：half，float32，float64，complex64，complex128， 。
+- name：操作的名称（可选）。
+
+返回值：
+
+该函数返回一个张量，与 x 具有相同的类型。
 
 #  DQN源码阅读
 
