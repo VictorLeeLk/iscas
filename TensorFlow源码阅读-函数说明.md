@@ -3340,7 +3340,7 @@ with tf.variable_scope("foo", reuse=True):
 
 - ValueError：当创建新的变量和形状时，在变量创建时违反重用，或当 initializer 的 dtype 和 dtype 不匹配时。在 variable_scope 中设置重用。
 
-## 10、tf.reshape函数重塑张量
+## 10、tf.reshape()
 
 由 Carrie 创建， 最后一次修改 2017-12-23
 
@@ -4416,6 +4416,104 @@ $ y = \log_e (1 + x)$
 返回值：
 
 该函数返回一个张量，与 x 具有相同的类型。
+
+##  24、tf.reduce_sum()
+
+```
+tf.reduce_sum 函数
+reduce_sum （ 
+    input_tensor ， 
+    axis = None ， 
+    keep_dims = False ， 
+    name = None ， 
+    reduction_indices = None
+ ）
+```
+
+定义在：[tensorflow/python/ops/math_ops.py](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-gt2k2cf1.html)。
+
+请参阅指南：[数学函数>减少](https://www.w3cschool.cn/tensorflow_python/)
+
+此函数计算一个张量的各个维度上元素的总和。 
+
+函数中的input_tensor是按照axis中已经给定的维度来减少的；除非 keep_dims 是true，否则张量的秩将在axis的每个条目中减少1；如果keep_dims为true，则减小的维度将保留为长度1。 
+
+如果axis没有条目，则缩小所有维度，并返回具有单个元素的张量。
+
+例如：
+
+```
+x = tf.constant([[1, 1, 1], [1, 1, 1]])
+tf.reduce_sum(x)  # 6
+tf.reduce_sum(x, 0)  # [2, 2, 2]
+tf.reduce_sum(x, 1)  # [3, 3]
+tf.reduce_sum(x, 1, keep_dims=True)  # [[3], [3]]
+tf.reduce_sum(x, [0, 1])  # 6
+```
+
+参数：
+
+- input_tensor：要减少的张量。应该有数字类型。
+- axis：要减小的尺寸。如果为None（默认），则缩小所有尺寸。必须在范围[-rank(input_tensor), rank(input_tensor))内。
+- keep_dims：如果为true，则保留长度为1的缩小尺寸。
+- name：操作的名称（可选）。
+- reduction_indices：axis的废弃的名称。
+
+返回：
+
+该函数返回减少的张量。
+
+numpy兼容性
+
+相当于np.sum
+
+## 25、tf.reduce_mean()
+
+```
+tf.reduce_mean 函数
+reduce_mean(
+    input_tensor,
+    axis=None,
+    keep_dims=False,
+    name=None,
+    reduction_indices=None
+)
+```
+
+定义在：[tensorflow/python/ops/math_ops.py](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-gt2k2cf1.html)。
+
+请参阅指南：[数学函数>减少](https://www.w3cschool.cn/tensorflow_python/tensorflow_python-u7wa28vm.html)
+
+计算张量的各个维度上的元素的平均值。
+
+axis是tf.reduce_mean函数中的参数，按照函数中axis给定的维度减少input_tensor。除非keep_dims是true，否则张量的秩将在axis的每个条目中减少1。如果keep_dims为true，则缩小的维度将保留为1。 
+
+如果axis没有条目，则减少所有维度，并返回具有单个元素的张量。
+
+例如：
+
+```
+x = tf.constant([[1., 1.], [2., 2.]])
+tf.reduce_mean(x)  # 1.5
+tf.reduce_mean(x, 0)  # [1.5, 1.5]
+tf.reduce_mean(x, 1)  # [1.,  2.]
+```
+
+参数：
+
+- input_tensor：要减少的张量。应该有数字类型。
+- axis：要减小的尺寸。如果为None（默认），则减少所有维度。必须在[-rank(input_tensor), rank(input_tensor))范围内。
+- keep_dims：如果为true，则保留长度为1的缩小尺寸。
+- name：操作的名称（可选）。
+- reduction_indices：axis的不支持使用的名称。
+
+返回：
+
+该函数返回减少的张量。
+
+numpy兼容性
+
+相当于np.mean
 
 #  DQN源码阅读
 
