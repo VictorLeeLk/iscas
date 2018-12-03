@@ -28,9 +28,9 @@ class Test(object):
 | 类方法   | 可以通过类名和实例来调用 | 可访问类属性，无法访问实例属性                 |
 | 静态方法 | 可以通过类名和实例来调用 | 无法访问类属性及实例属性（仅可通过传值的方式） |
 
-<<<<<<< Updated upstream
+
 ## 2、python3 zip()函数
->>>>>>> Stashed changes
+>Stashed changes
 
 **zip()** 函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的对象，这样做的好处是节约了不少的内存。
 
@@ -712,7 +712,7 @@ self is <__main__.B object at 0x106c49b38> @A.add
 这个结果说明了两个问题:
 
 - 1、super().add(m) 确实调用了父类 A 的 add 方法。
-- 2、super().add(m) 调用父类方法 def add(self, m) 时, 此时父类中 self 并不是父类的实例而是子类的实例, 所以 b.add(2) 之后的结果是 5 而不是 4 。
+- 2、super().add(m) 调用父类方法 def add(self, m) 时, 此时==父类中 self 并不是父类的实例而是子类的实例== , 所以 b.add(2) 之后的结果是 5 而不是 4 。
 
 不知道这个结果是否和你想到一样呢？下面我们来看一个多继承的例子。
 
@@ -783,7 +783,7 @@ self is <__main__.D object at 0x10ce10e48> @A.add
 >>>
 ```
 
-在大多数情况下， super 包含了两个非常重要的信息: 一个 MRO 以及 MRO 中的一个类。当以如下方式调用 super 时:
+在大多数情况下， super 包含了两个非常重要的信息: **一个 MRO 以及 MRO 中的一个类。**当以如下方式调用 super 时:
 
 ```
 super(a_type, obj)
@@ -2444,6 +2444,86 @@ x=dict([("a","1"),["b","2"]])
 
 ```
 dict.fromkeys(("a","b"),1)
+```
+
+## 30、python3 Counter()
+
+Counter是dict子类，主要是为了对哈希对象进行计数。这是一个集合，其中元素值存储为字典的键，元素的数量存储为字典的值。计数值可以为0或者负值。初始化如下：
+
+```
+>>> c = Counter()                           # a new, empty counter
+>>> c = Counter('gallahad')                 # a new counter from an iterable
+>>> c = Counter({'red': 4, 'blue': 2})      # a new counter from a mapping
+>>> c = Counter(cats=4, dogs=8)             # a new counter from keyword args
+>>> c
+Counter({'dogs':8,'cats':4})
+```
+
+```
+>>> c=Counter('aabbbcccc')
+>>> c
+Counter({'c':4,'b':3,'a':2})
+```
+
+**elements**
+
+Return an iterator over elements repeating each as many times as its count.  Elements are returned in arbitrary order.  If an element’s count is less than one, [`elements()`](https://docs.python.org/3/library/collections.html#collections.Counter.elements) will ignore it.
+
+```
+>>> c = Counter(a=4, b=2, c=0, d=-2)
+>>> sorted(c.elements())
+['a', 'a', 'a', 'a', 'b', 'b']
+```
+
+**most_common([*n*])**
+
+Return a list of the *n* most common elements and their counts from the most common to the least.  If *n* is omitted or `None`, [`most_common()`](https://docs.python.org/3/library/collections.html#collections.Counter.most_common) returns *all* elements in the counter. Elements with equal counts are ordered arbitrarily:
+
+```
+>>> Counter('abracadabra').most_common(3)  # doctest: +SKIP
+[('a', 5), ('r', 2), ('b', 2)]
+```
+
+**subtract([*iterable-or-mapping*])**
+
+> 原来的元素中减去新传入的元素
+
+Elements are subtracted from an *iterable* or from another *mapping* (or counter).  Like [`dict.update()`](https://docs.python.org/3/library/stdtypes.html#dict.update) but subtracts counts instead of replacing them.  Both inputs and outputs may be zero or negative.
+
+```
+>>> c = Counter(a=4, b=2, c=0, d=-2)
+>>> d = Counter(a=1, b=2, c=3, d=4)
+>>> c.subtract(d)
+>>> c
+Counter({'a': 3, 'b': 0, 'c': -3, 'd': -6})
+```
+
+**update([*iterable-or-mapping*])**
+
+Elements are counted from an *iterable* or added-in from another *mapping* (or counter).  Like [`dict.update()`](https://docs.python.org/3/library/stdtypes.html#dict.update) but adds counts instead of replacing them.  Also, the *iterable* is expected to be a sequence of elements, not a sequence of `(key, value)` pairs. 
+
+```
+import collections
+obj = collections.Counter(['11','22'])
+obj.update(['22','55'])
+print(obj)
+
+#输出：Counter({'22': 2, '11': 1, '55': 1})
+```
+
+**其他操作**
+
+```
+>>> c = Counter(a=3, b=1)
+>>> d = Counter(a=1, b=2)
+>>> c + d                       # add two counters together:  c[x] + d[x]
+Counter({'a': 4, 'b': 3})
+>>> c - d                       # subtract (keeping only positive counts)
+Counter({'a': 2})
+>>> c & d                       # intersection:  min(c[x], d[x]) # doctest: +SKIP
+Counter({'a': 1, 'b': 1})
+>>> c | d                       # union:  max(c[x], d[x])
+Counter({'a': 3, 'b': 2})
 ```
 
 # Gym源码阅读
@@ -4548,6 +4628,18 @@ tf.reduce_mean(x, 1)  # [1.,  2.]
 numpy兼容性
 
 相当于np.mean
+
+## 26、tf.clip_by_value()
+
+**tf.clip_by_value(y,1e-10,1)**
+
+该函数将y中的元素值强行控制在1e-10到1之间。y表示张量。
+
+- 当y中元素值小于1e-10，则变成1e-10
+- 当y中元素值大于1，则变成1
+- 在范围内，则不发生改变
+
+目的：防止一些错误的运算，比如说对数为0的情况。可以将对数强行限制在指定范围，从而避免了错误发生的可能性。
 
 #  DQN源码阅读
 
