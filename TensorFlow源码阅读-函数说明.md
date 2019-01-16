@@ -4641,6 +4641,50 @@ numpy兼容性
 
 目的：防止一些错误的运算，比如说对数为0的情况。可以将对数强行限制在指定范围，从而避免了错误发生的可能性。
 
+## 27、tf.greater()
+
+输入两个张量，此函数会比较这两个张量中每一个元素的大小，并返回比较结果。
+
+当两个张量维度不一致的时候，TensorFlow会进行类似NumPy广播操作（broadcasting）的处理。
+
+实例如下：
+
+```
+import tensorflow as tf
+a=tf.constant([1,2,3,4])
+b=tf.constant([4,3,2,1])
+sess=tf.InteractiveSession()
+print(tf.greater(a,b).eval())
+sess.close()
+```
+
+输出为：
+
+```
+[False,False,True,True]
+```
+
+## 28、tf.where()
+
+函数有三个参数。第一个位选择条件依据，当选择条件为True时，tf.where函数会选择第二个参数中的值，否则使用第三个参数中的值。注意tf.where函数判断和选择的都是元素级别进行。
+
+实例如下：
+
+```
+import tensorflow as tf
+a=tf.constant([1,2,3,4])
+b=tf.constant([4,3,2,1])
+sess=tf.InteractiveSession()
+print(tf.where(tf.greater(a,b),a,b).eval())
+sess.close()
+```
+
+输出为：
+
+```
+[4,3,3,4]
+```
+
 #  DQN源码阅读
 
 > 2018/8/20
