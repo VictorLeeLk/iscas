@@ -1,6 +1,6 @@
-# 
 
-# Python基本函数
+
+# 一、Python基本函数
 
 ## 1、Python类中方法介绍
 
@@ -2526,7 +2526,145 @@ Counter({'a': 1, 'b': 1})
 Counter({'a': 3, 'b': 2})
 ```
 
-# Gym源码阅读
+## 31、os.walk函数
+
+- 概述 
+
+os.walk() 方法用于通过在目录树中游走输出在目录中的文件名，向上或者向下。
+
+os.walk() 方法是一个简单易用的文件、目录遍历器，可以帮助我们高效的处理文件、目录方面的事情。
+
+在Unix，Windows中有效。
+
+- 语法
+
+**walk()**方法语法格式如下：
+
+```
+os.walk(top[, topdown=True[, onerror=None[, followlinks=False]]])
+```
+
+**参数**
+
+- **top** -- 是你所要遍历的目录的地址, 返回的是一个三元组(root,dirs,files)。
+  - root 所指的是当前正在遍历的这个文件夹的本身的地址
+  - dirs 是一个 list ，内容是该文件夹中所有的目录的名字(不包括子目录)
+  - files 同样是 list , 内容是该文件夹中所有的文件(不包括子目录)
+- **topdown** --可选，为 True，则优先遍历 top 目录，否则优先遍历 top 的子目录(默认为开启)。如果 topdown 参数为 True，walk 会遍历top文件夹，与top 文件夹中每一个子目录。
+- **onerror** -- 可选，需要一个 callable 对象，当 walk 需要异常时，会调用。
+- **followlinks** -- 可选，如果为 True，则会遍历目录下的快捷方式(linux 下是软连接 symbolic link )实际所指的目录(默认关闭)，如果为 False，则优先遍历 top 的子目录。   
+
+**返回值**
+
+该方法没有返回值。
+
+- 目录结构如下图所示：
+
+  './'表示‘f:/软件所工作/software/tensorflow_learning’
+
+![dirs_base](F:\软件所工作\iscas-git\TensorFlow源码阅读-函数说明.assets/dirs_base.png)
+
+![dirs_sub1](F:\软件所工作\iscas-git\TensorFlow源码阅读-函数说明.assets/dirs_sub1.png)
+
+![dirs_sub1_sub1](F:\软件所工作\iscas-git\TensorFlow源码阅读-函数说明.assets/dirs_sub1_sub1.png)
+
+![dirs_sub2_sub2](F:\软件所工作\iscas-git\TensorFlow源码阅读-函数说明.assets/dirs_sub2_sub2.png)
+
+- 输出x[0]
+
+  说明：输出目录树中所有文件夹的路径
+
+```
+for x in os.walk('./'):
+	print(x[0])
+```
+
+结果如下：
+
+>for x in os.walk('./'):
+>...     print(x[0])
+>...
+>./
+>./.vscode
+>./.vscode\.ropeproject
+>./learing_tensorflow_book
+>./learing_tensorflow_book\chapter5
+>./learing_tensorflow_book\chapter5\__pycache__
+>./learing_tensorflow_book\chapter6
+>./learing_tensorflow_book\chapter6\flower_photos
+>./learing_tensorflow_book\chapter6\flower_photos\flower_photos
+>./learing_tensorflow_book\chapter6\flower_photos\flower_photos\daisy
+>./learing_tensorflow_book\chapter6\flower_photos\flower_photos\dandelion
+>./learing_tensorflow_book\chapter6\flower_photos\flower_photos\roses
+>./learing_tensorflow_book\chapter6\flower_photos\flower_photos\sunflowers
+>./learing_tensorflow_book\chapter6\flower_photos\flower_photos\tulips
+>./tensorflow-tutorial-master
+>./tensorflow-tutorial-master\Data_sets
+>./tensorflow-tutorial-master\Data_sets\MNIST_data
+>
+>未完省略
+
+- 输出x[1]
+
+  说明：沿着目录树，输出当前目录下（不包含子目录）所有子文件夹的名称列表
+
+```
+for x in os.walk('./'):
+	print(x[1])
+```
+
+结果如下：
+
+> for x in os.walk('./'):
+>...     print(x[1])
+>...
+>['.vscode', 'learing_tensorflow_book', 'tensorflow-tutorial-master']
+>['.ropeproject']
+>[]
+>['chapter5', 'chapter6']
+>['__pycache__']
+>[]
+>['flower_photos']
+>['flower_photos']
+>['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips']
+>[]
+>[]
+>[]
+>[]
+>[]
+>['Data_sets', 'tensorflow-tutorial-master']
+>['MNIST_data']
+>[]
+>
+>未完省略
+
+- 输出x[2]
+
+  说明：沿着目录树，输出当前目录下（不包含子目录）所有文件列表，包括空列表
+
+  ```
+  for x in os.walk('./'):
+  	print(x[2])
+  ```
+
+  
+
+>  for x in os.walk('./'):
+> ...     print(x[2])
+> ...
+> ['checkpoint', 'demo_test1.py', 'DQN.py', 'intro_tf.py', 'tensorflow-tutorial-master.zip']
+> ['launch.json', 'settings.json']
+> ['config.py']
+> ['chapter4.py', 'chapter5.py', 'chapter5_4.py', 'chapter5_5.py', 'chapter5_b.py']
+> ['checkpoint', 'mnist_eval.py', 'mnist_inference.py', 'mnist_train.py', 'model.ckpt-25001.data-00000-of-00001', 'model.ckpt-25001.index', 'model.ckpt-25001.meta', 'model.ckpt-26001.data-00000-of-00001', 'model.ckpt-26001.index', 'model.ckpt-26001.meta', 'model.ckpt-27001.data-00000-of-00001', 'model.ckpt-27001.index', 'model.ckpt-27001.meta', 'model.ckpt-28001.data-00000-of-00001', 'model.ckpt-28001.index', 'model.ckpt-28001.meta', 'model.ckpt-29001.data-00000-of-00001', 'model.ckpt-29001.index', 'model.ckpt-29001.meta']
+> ['mnist_inference.cpython-36.pyc', 'mnist_train.cpython-36.pyc']
+> ['flower_photos.tgz', 'mnist_inference.py', 'mnist_train.py']
+> ['train_flowers.py']
+> ['LICENSE.txt']
+>
+> 未完省略
+
+# 二、Gym源码阅读
 
 ## 1、Discrete类
 
@@ -2589,7 +2727,7 @@ class MultiDiscrete(gym.Space):
 
 
 
-# TensorFlow源码阅读-函数说明
+# 三、TensorFlow源码阅读-函数说明
 
 >  **说明：**1)主要记录平时遇到的tf函数，并且对函数的功能进行简单说明，举出相应的示例理解。
 >
@@ -4685,7 +4823,289 @@ sess.close()
 [4,3,3,4]
 ```
 
-#  DQN源码阅读
+## 29、tf.truncated_normal()
+
+tf.truncated_normal(shape, mean, stddev) :shape表示生成张量的维度，mean是均值，stddev是标准差。这个函数产生正太分布，均值和标准差自己设定。这是一个截断的产生正态分布的函数，就是说产生正太分布的值如果与均值的差值大于两倍的标准差，那就重新生成。和一般的正太分布的产生随机数据比起来，这个函数产生的随机数与均值的差距不会超过两倍的标准差，但是一般的别的函数是可能的。
+
+```
+import tensorflow as tf;
+import numpy as np;
+import matplotlib.pyplot as plt;
+ 
+c = tf.truncated_normal(shape=[10,10], mean=0, stddev=1)
+ 
+with tf.Session() as sess:
+	print sess.run(c)
+
+```
+
+输出：
+
+```
+[[ 1.95758033 -0.68666345 -1.83860338  0.78213859 -1.08119416 -1.44530308
+   0.38035342  0.57904619 -0.57145643 -1.22899497]
+ [-0.75853795  0.48202974  1.03464043  1.19210851 -0.15739718  0.8506189
+   1.18259966 -0.99061841 -0.51968449  1.38996458]
+ [ 1.05636907 -0.02668529  0.64182931  0.4110294  -0.4978295  -0.64912242
+   1.27779591 -0.01533993  0.47417602 -1.28639436]
+ [-1.65927458 -0.364887   -0.45535028  0.078814   -0.30295736  1.91779387
+  -0.66928798 -0.14847915  0.91875714  0.61889237]
+ [-0.01308221 -0.38468206  1.34700036  0.64531708  1.15899456  1.09932268
+   1.22457981 -1.1610316   0.59036094 -1.97302651]
+ [-0.24886213  0.82857937  0.09046989  0.39251322  0.21155456 -0.27749416
+   0.18883201  0.08812679 -0.32917103  0.20547724]
+ [ 0.05388507  0.45474565  0.23398806  1.32670367 -0.01957406  0.52013856
+  -1.13907862 -1.71957874  0.75772947 -1.01719368]
+ [ 0.27155915  0.05900437  0.81448066 -0.37997526 -0.62020499 -0.88820189
+   1.53407145 -0.01600445 -0.4236775  -1.68852305]
+ [ 0.78942037 -1.32458341 -0.91667277 -0.00963761  0.76824385 -0.5405798
+  -0.73307443 -1.19854116 -0.66179073  0.26329204]
+ [ 0.59473759 -0.37507254 -1.21623695 -1.30528259  1.18013096 -1.32077384
+  -0.59241474 -0.28063133  0.12341146  0.48480138]]
+```
+
+## 30、tf.argmax()
+
+​        首先，明确一点，tf.argmax可以认为就是np.argmax。tensorflow使用numpy实现的这个API。 
+　　 
+　　简单的说，tf.argmax就是返回最大的那个数值所在的下标。 
+　　 
+　　这个很好理解，只是tf.argmax()的参数让人有些迷惑，比如，tf.argmax(array, 1)和tf.argmax(array, 0)有啥区别呢？ 
+　　 
+　　这里面就涉及到一个概念：axis。上面例子中的1和0就是axis。我先笼统的解释这个问题，设置axis的主要原因是方便我们进行多个维度的计算。
+
+　　在实例面前，再多的语言都是苍白的呀，上例子！
+
+　　比如：
+
+```
+test = np.array([[1, 2, 3], [2, 3, 4], [5, 4, 3], [8, 7, 2]])
+np.argmax(test, 0)　　　＃输出：array([3, 3, 1]
+np.argmax(test, 1)　　　＃输出：array([2, 2, 0, 0]
+```
+
+　　啥意思呢？
+
+- axis = 0: 
+
+　　你就这么想，0是最大的范围，所有的数组都要进行比较，只是比较的是这些数组相同位置上的数：
+
+```
+test[0] = array([1, 2, 3])
+test[1] = array([2, 3, 4])
+test[2] = array([5, 4, 3])
+test[3] = array([8, 7, 2])
+output   :    [3, 3, 1]
+```
+
+- axis = 1: 
+
+　　等于1的时候，比较范围缩小了，只会比较每个数组内的数的大小，结果也会根据有几个数组，产生几个结果。
+
+```
+test[0] = array([1, 2, 3])  #2
+test[1] = array([2, 3, 4])  #2
+test[2] = array([5, 4, 3])  #0
+test[3] = array([8, 7, 2])  #0
+```
+
+　　这是里面都是数组长度一致的情况，如果不一致，axis最大值为最小的数组长度-1，超过则报错。 
+
+## 31、tf.cast()
+
+TensorFlow中类型转换函数
+
+`参数`
+
+- x：输入
+- dtype：转换目标类型
+- name：名称
+
+返回：Tensor
+
+例：
+
+```
+# tensor `a` is [1.8, 2.2], dtype=tf.float
+tf.cast(a, tf.int32) ==> [1, 2]  # dtype=tf.int32
+```
+
+# 四、TensorFlow-Mnist
+
+
+
+问题汇总：
+
+-  为什么在计算交叉熵损失的时候不采用移动平均值计算的输出值，而是采用未经移动平均计算的输出值？
+
+  在使用移动平均值参数输出的结果，发现正确率基本为0，原因是什么？
+
+```
+# LK
+# 2019/01/17
+import tensorflow as tf 
+from tensorflow.examples.tutorials.mnist import input_data
+
+# MINIST数据集相关的常数
+INPUT_NODE = 784
+OUTPUT_NODE = 10
+
+# 配置神经网络参数
+LAYER1_NODE = 500  # 只使用一个隐藏层，有500个节点
+BATCH_SIZE = 100   # 一个训练batch中训练数据个数
+
+LEARNING_RATE_BASE = 0.8     # 基础的学习率
+LEARNING_RATE_DECAY = 0.99   # 学习率的衰减率
+REGULARIZATION_RATE = 0.0001 # 描述模型复杂度的正则化项在损失函数中的系数
+TRAINING_STEPS = 30000       # 训练轮数
+MOVING_AVERAGE_DECAY = 0.99  # 滑动平均衰减率
+
+# 一个辅助函数，给定神经网络的输入和所有参数，计算神经网络的前向传播结果。在这里定义了
+# 一个使用ReLU激活函数的三层全连接神经网络。通过加入隐藏层实现了多层网络结构，
+# 通过ReLU激活函数实现了去线性化，在这个函数中也支持传入用于计算参数平均值的类，
+# 这样方便在测试时使用滑动平均模型
+def inference(input_tensor,avg_class,weights1,biases1,weights2,biases2):
+    # 当没有提供滑动平均类时，直接使用参数当前的权值
+    if avg_class == None:
+        # 计算隐藏层的前向传播结果，使用了ReLU激活函数
+        layer1 = tf.nn.relu(tf.matmul(input_tensor,weights1) + biases1)
+        
+        # 计算输出层前向传播结果，因为在计算损失函数时会一并计算softmax函数，
+        # 所以这里不需要加入激活函数。而且不加入softmax不会影响预测结果。因为预测时
+        # 使用的是不同类别对应节点输出值的相对大小，有没有softmax层对最后分类结果的
+        # 计算没有影响，于是在计算整个神经网络的前向传播时可以不加入最后的softmax层。
+        return tf.matmul(layer1,weights2) + biases2
+    else:
+        # 首先使用avg_class.average函数来计算得出变量的滑动平均值，
+        # 然后计算相应的神经网络前向传播结果
+        layer1 = tf.nn.relu(tf.matmul(input_tensor,avg_class.average(weights1)) + avg_class.average(biases1))
+        return tf.matmul(layer1,avg_class.average(weights2)) + avg_class.average(biases2)
+
+# 训练模型的过程
+def train(mnist):
+    x = tf.placeholder(tf.float32,[None,INPUT_NODE],name="x-input")
+    y_ = tf.placeholder(tf.float32,[None,OUTPUT_NODE],name="y-input")
+
+    # 生成隐含层的参数
+    weights1 = tf.Variable(
+        tf.truncated_normal([INPUT_NODE,LAYER1_NODE],stddev = 0.1))
+    biases1 = tf.Variable(tf.constant(0.1,shape=[LAYER1_NODE]))
+
+    # 生成输出层参数
+    weights2 = tf.Variable(
+        tf.truncated_normal([LAYER1_NODE,OUTPUT_NODE],stddev = 0.1))
+    biases2 = tf.Variable(tf.constant(0.1,shape=[OUTPUT_NODE]))
+
+    # 计算在当前参数下神经网络前向传播的结果。这里面给出的是用于计算滑动平均的类为None,
+    # 所以函数不会使用参数的滑动平均
+    y = inference(x,None,weights1,biases1,weights2,biases2)
+
+    # 定义存储训练轮数的变量。这个变量不需要计算滑动平均值，所以这里指定这个变量为
+    # 不可训练的变量.在使用tensorflow训练神经网络时，
+    # 一般会将代表训练轮数的变量指定为不可训练的参数
+    global_step = tf.Variable(0,trainable=False)
+
+    # 给定滑动平均衰减率和训练轮数的变量，初始化滑动平均类，
+    # 给定训练轮数的变量可以加快训练早期变量的更新速度
+    variable_averages = tf.train.ExponentialMovingAverage(
+        MOVING_AVERAGE_DECAY,global_step)
+    
+    # 在所有代表神经网络参数的变量上使用滑动平均，其他辅助变量（比如flobal_step）就
+    # 不需要了。tf.trainable_variable 返回的就是图上集合
+    # GraphKeys.TRAINABLE_VARIABLES中的元素。这个集合的元素就是所有没有指定
+    # trainable=False的参数
+    variables_averages_op = variable_averages.apply(tf.trainable_variables())
+
+    # 计算使用了滑动平均之后的前向传播结果。
+    # 滑动平均不会改变变量本身的取值，而是维护一个影子变量来记录滑动平均值。
+    # 所以当需要使用这个滑动平均值时，需要明确调用average函数。
+    average_y = inference(x,variable_averages,weights1,biases1,weights2,biases2)
+
+    # 计算交叉熵作为刻画预测值和真实值之间差距的损失函数。这里使用了TensorFlow中提供
+    # 的sparse_softmax_cross_entropy_with_logits 函数来计算交叉熵。当分类问题只有一个正确答案时，
+    # 可以使用这个函数来加速交叉熵的计算。MNIST问题的图片中只包含了0-9中的一个数字，所以可以使用这个函数
+    # 来计算交叉熵损失。这个函数的第一个参数是神经网络不包括softmax前向传播结果，第二个参数是训练数据的
+    # 正确答案，因为标准答案是一个长度为10的一维数组，而该函数需要提供的是一个正确答案的数字，所以需要使用
+    # tf.argmax函数来得到正确答案对应的类别编号。
+    corss_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits = y,labels = tf.argmax(y_,1))  # 取每一行的最大值的下标索引
+    # 计算在当前batch中所有样例的交叉熵平均值
+    corss_entropy_mean = tf.reduce_mean(corss_entropy)
+
+    # 计算L2正则化损失函数
+    regularizer = tf.contrib.layers.l2_regularizer(REGULARIZATION_RATE)
+    # 计算模型正则化损失。一般只计算神经网络边上权重的正则化损失，而不计算偏置项
+    regularization = regularizer(weights1) + regularizer(weights2)
+    # 总损失等于交叉熵损失和正则化损失的和
+    loss = corss_entropy_mean #+ regularization
+    # 设置指数衰减的学习率
+    learning_rate = tf.train.exponential_decay(
+        LEARNING_RATE_BASE,                     # 基础学习率
+        global_step,                            # 当前迭代轮数
+        mnist.train.num_examples / BATCH_SIZE,  # 过完所有的训练数据需要的迭代轮数
+        LEARNING_RATE_DECAY)                    # 学习率衰减速度
+
+    # 优化损失函数
+    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss,global_step= global_step)
+
+    # 在训练神经网络模型时，每过一遍数据既需要通过反向传播来更新神经网络的参数
+    # 又要更新每一个参数的滑动平均值。为了一次完成多个操作，Tensorflow提供饿了
+    # tf.control_dependecies 和tf.group 两种机制。下面两行程序和
+    # train_op = tf.group(train_step,variables_averages_op)是等价的
+    with tf.control_dependencies([train_step,variables_averages_op]):
+        train_op = tf.no_op(name = "train")
+    # import pdb
+    # pdb.set_trace()
+    correct_prediction = tf.equal(tf.argmax(average_y,1),tf.argmax(y_,1))
+    
+    # 这个运算首先会将一个bool值转换为实数型，然后计算均值。这个平均值就是模型在这一组数据上的正确率
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
+
+    # 初始化会话并开始训练过程
+    with tf.Session() as sess:
+        tf.global_variables_initializer().run()
+        # 准备验证数据。一般在神经网络的训练过程中会通过验证数据来大致判断停止的条件和评判训练的效果
+        validate_feed = {x:mnist.validation.images,
+                         y_:mnist.validation.labels}
+        
+        # 准备测试数据。真实的应用中，这部分数据在训练时候是不可见的，这个数据只是作为模型优劣的最后评价标准
+        test_feed = {x:mnist.test.images,
+                     y_:mnist.test.labels}
+
+        # 迭代训练神经网络
+        for i in range(TRAINING_STEPS):
+            # 每1000轮输出一次在验证数据集上的测试结果
+            if i % 1000 ==0:
+                validate_acc = sess.run(accuracy,feed_dict=validate_feed)
+                print("after %d training step(s),validate accuracy"
+                      "using average model is %g"%(i,validate_acc))
+            # 产生这一轮使用的一个batch的训练数据，并运行训练过程
+            xs,ys=mnist.train.next_batch(BATCH_SIZE)
+            sess.run(train_op,feed_dict={x:xs,y_:ys})
+        # 在训练结束之后，在测试数据集上检测神经网络模型的最终正确率
+        test_acc = sess.run(accuracy,feed_dict = test_feed)
+        print("After %d traing step(s),test accuracy using average "
+              "model is %g"%(TRAINING_STEPS,test_acc))
+def main(argv = None):
+    mnist = input_data.read_data_sets(r"F:\软件所工作\software\tensorflow_learning\tensorflow-tutorial-master\Data_sets\MNIST_data",one_hot=True)
+    train(mnist)
+# TensorFlow 提供的一个主程序入口，tf.app.run会调用上面定义的main函数
+if __name__ =="__main__":
+    tf.app.run()
+```
+
+- 损失包括l2正则化
+
+  test_acc = 0.9846
+
+- 损失不包括l2正则化
+
+  test_acc = 0.9824
+
+
+
+
+
+#  五、DQN源码阅读
 
 > 2018/8/20
 
