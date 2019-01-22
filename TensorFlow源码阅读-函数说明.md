@@ -2562,13 +2562,13 @@ os.walk(top[, topdown=True[, onerror=None[, followlinks=False]]])
 
   './'表示‘f:/软件所工作/software/tensorflow_learning’
 
-![dirs_base](F:\软件所工作\iscas-git\TensorFlow源码阅读-函数说明.assets/dirs_base.png)
+![dirs_base](./pictures/dirs_base.png)
 
-![dirs_sub1](F:\软件所工作\iscas-git\TensorFlow源码阅读-函数说明.assets/dirs_sub1.png)
+![dirs_sub1](./pictures/dirs_sub1.png)
 
-![dirs_sub1_sub1](F:\软件所工作\iscas-git\TensorFlow源码阅读-函数说明.assets/dirs_sub1_sub1.png)
+![dirs_sub1_sub1](./pictures/dirs_sub1_sub1.png)
 
-![dirs_sub2_sub2](F:\软件所工作\iscas-git\TensorFlow源码阅读-函数说明.assets/dirs_sub2_sub2.png)
+![dirs_sub2_sub2](./pictures/dirs_sub2_sub2.png)
 
 - 输出x[0]
 
