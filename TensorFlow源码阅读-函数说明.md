@@ -2647,8 +2647,6 @@ for x in os.walk('./'):
   	print(x[2])
   ```
 
-  
-
 >  for x in os.walk('./'):
 > ...     print(x[2])
 > ...
@@ -2663,6 +2661,340 @@ for x in os.walk('./'):
 > ['LICENSE.txt']
 >
 > 未完省略
+
+## 32、python extend函数
+
+功能：extend() 函数用于在列表末尾一次性追加另一个序列中的多个值（用新列表扩展原来的列表）。
+
+extend()方法语法：
+
+```
+list.extend(seq)
+```
+
+```
+#!/usr/bin/python
+
+aList = [123, 'xyz', 'zara', 'abc', 123];
+bList = [2009, 'manni'];
+aList.extend(bList)
+
+print "Extended List : ", aList ;
+```
+
+以上实例输出结果如下：
+
+```
+Extended List :  [123, 'xyz', 'zara', 'abc', 123, 2009, 'manni']
+```
+
+## 33、python glob.glob()
+
+通配符是一些特殊符号，主要有星号(\*)和问号(?)，用来模糊搜索文件，“*”可以匹配任意个数个符号， “？”可以匹配单个字符。当查找文件夹时，可以使用它来代替一个或多个真正字符；
+
+当不知道真正字符或者需要匹配符合一定条件的多个目标文件时，可以使用通配符代替一个或多个真正的字符。
+
+英文 “globbing”意为统配，python在模块glob中定义了glob()函数，实现了对目录内容进行匹配的功能，glob.glob()函数接受通配模式作为输入，并返回所有匹配的文件名和路径名列表，与os.listdir类似。
+
+glob(pathname, recursive=False) 
+第一个参数pathname为需要匹配的字符串。（该参数应尽量加上r前缀，以免发生不必要的错误） 
+第二个参数代表递归调用，与特殊通配符“**”一同使用，默认为False。 
+
+该函数返回一个符合条件的路径的字符串列表，如果使用的是Windows系统，路径上的“\”符号会自动加上转义符号变为“\\”。 
+
+## 34、np.split()
+
+> time:2019/01/25
+
+1、split(ary, indices_or_sections, axis=0) :把一个数组从左到右按顺序切分 
+参数： 
+ary:要切分的数组 
+indices_or_sections:如果是一个整数，就用该数平均切分，如果是一个数组，为沿轴切分的位置（左开右闭） 
+axis：沿着哪个维度进行切向，默认为0，横向切分。为1时，纵向切分
+
+>x = np.arange(9.0)
+>np.split(x, 3)
+>[array([ 0.,  1.,  2.]), array([ 3.,  4.,  5.]), array([ 6.,  7.,  8.])]
+>x = np.arange(8.0)
+>np.split(x, [3, 5, 6, 10])
+>[array([ 0.,  1.,  2.]),
+>array([ 3.,  4.]),
+>array([ 5.]),
+>array([ 6.,  7.]),
+>array([], dtype=float64)]
+
+2、（3，）的用法
+
+m = np.arange(8.0)
+n = np.split(m, (3,))
+print(n)
+
+结果：[array([0., 1., 2.]), array([3., 4., 5., 6., 7.])]
+
+机器学习中的用法解释：
+#axis=1,代表列，是要把data数据集中的所有数据按第四、五列之间分割为X集和Y集。
+
+x, y = np.split(data, (4,), axis=1
+
+3、实际测试
+
+```
+#!/usr/bin/env python
+# _*_ coding: utf-8 _*_
+ 
+import numpy as np
+ 
+# Test 1
+A = np.arange(12).reshape(3, 4)
+print A
+ 
+# 纵向分割, 分成两部分, 按列分割
+print np.split(A, 2, axis = 1)
+# 横向分割, 分成三部分, 按行分割
+print np.split(A, 3, axis = 0)
+ 
+# Test 1 result
+[[ 0  1  2  3]
+ [ 4  5  6  7]
+ [ 8  9 10 11]]
+[array([[0, 1],
+       [4, 5],
+       [8, 9]]), array([[ 2,  3],
+       [ 6,  7],
+       [10, 11]])]
+[array([[0, 1, 2, 3]]), array([[4, 5, 6, 7]]), array([[ 8,  9, 10, 11]])]
+ 
+# Test 2
+# 不均等分割
+print np.array_split(A, 3, axis = 1)
+ 
+# Test 2 result
+[array([[0, 1],
+       [4, 5],
+       [8, 9]]), array([[ 2],
+       [ 6],
+       [10]]), array([[ 3],
+       [ 7],
+       [11]])]
+In [5]: 
+# Test 3
+# 垂直方向分割
+print np.vsplit(A, 3)
+# 水平方向分割
+print np.hsplit(A, 2)
+ 
+# Test 3 result
+[array([[0, 1, 2, 3]]), array([[4, 5, 6, 7]]), array([[ 8,  9, 10, 11]])]
+[array([[0, 1],
+       [4, 5],
+       [8, 9]]), array([[ 2,  3],
+       [ 6,  7],
+       [10, 11]])]
+```
+
+## 35、`_slots()_`
+
+- 更快的访问速度
+- 减少内存消耗
+
+正常情况下，当我们定义了一个class，创建了一个class的实例后，我们可以给该实例绑定任何属性和方法，这就是动态语言的灵活性。先定义class：
+
+```
+>>> class Student(object):
+...     pass
+...
+```
+
+然后，尝试给实例绑定一个属性：
+
+```
+>>> s = Student()
+>>> s.name = 'Michael' # 动态给实例绑定一个属性
+>>> print s.name
+Michael
+```
+
+还可以尝试给实例绑定一个方法：
+
+```
+>>> def set_age(self, age): # 定义一个函数作为实例方法
+...     self.age = age
+...
+>>> from types import MethodType
+>>> s.set_age = MethodType(set_age, s, Student) # 给实例绑定一个方法
+>>> s.set_age(25) # 调用实例方法
+>>> s.age # 测试结果
+25
+```
+
+但是，给一个实例绑定的方法，对另一个实例是不起作用的：
+
+```
+>>> s2 = Student() # 创建新的实例
+>>> s2.set_age(25) # 尝试调用方法
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'Student' object has no attribute 'set_age'
+```
+
+为了给所有实例都绑定方法，可以给class绑定方法：
+
+```
+>>> def set_score(self, score):
+...     self.score = score
+...
+>>> Student.set_score = MethodType(set_score, None, Student)
+```
+
+给class绑定方法后，所有实例均可调用：
+
+```
+>>> s.set_score(100)
+>>> s.score
+100
+>>> s2.set_score(99)
+>>> s2.score
+99
+```
+
+通常情况下，上面的`set_score`方法可以直接定义在class中，但动态绑定允许我们在程序运行的过程中动态给class加上功能，这在静态语言中很难实现。
+
+- 使用`__slots__`
+
+但是，如果我们想要限制class的属性怎么办？比如，只允许对Student实例添加`name`和`age`属性。
+
+为了达到限制的目的，Python允许在定义class的时候，定义一个特殊的`__slots__`变量，来限制该class能添加的属性：
+
+```
+>>> class Student(object):
+...     __slots__ = ('name', 'age') # 用tuple定义允许绑定的属性名称
+...
+```
+
+然后，我们试试：
+
+```
+>>> s = Student() # 创建新的实例
+>>> s.name = 'Michael' # 绑定属性'name'
+>>> s.age = 25 # 绑定属性'age'
+>>> s.score = 99 # 绑定属性'score'
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'Student' object has no attribute 'score'
+```
+
+由于`'score'`没有被放到`__slots__`中，所以不能绑定`score`属性，试图绑定`score`将得到AttributeError的错误。
+
+使用`__slots__`要注意，`__slots__`定义的属性仅对当前类起作用，对继承的子类是不起作用的：
+
+```
+>>> class GraduateStudent(Student):
+...     pass
+...
+>>> g = GraduateStudent()
+>>> g.score = 9999
+```
+
+除非在子类中也定义`__slots__`，这样，子类允许定义的属性就是自身的`__slots__`加上父类的`__slots__`。
+
+```
+class Person(object):
+
+    __slots__ = ('name', 'gender')
+
+    def __init__(self, name, gender):
+        self.name = name
+        self.gender = gender
+
+class Student(Person):
+
+    __slots__ = ('score',)
+
+    def __init__(self,name,gender,score):
+        super(Student,self).__init__(name,gender)
+        self.score=score
+
+s = Student('Bob', 'male', 59)
+s.name = 'Tim'
+s.score = 99
+print s.score
+```
+
+其他详解
+
+1）更快的访问速度
+
+默认情况下，访问一个实例的属性是通过访问该实例的`__dict__`来实现的。如访问`a.x`就相当于访问`a.__dict__['x']`。为了便于理解，我粗略地将它拆分为四步：
+
+1. `a.x` 2. `a.__dict__` 3. `a.__dict__['x']` 4. 结果
+
+从`__slots__`的实现可以得知，定义了`__slots__`的类会为每个属性创建一个描述器。访问属性时就直接调用这个描述器。在这里我将它拆分为三步：
+
+1. `b.x` 2. `member decriptor` 3. 结果
+
+我在上文提到，访问`__dict__`和描述器的速度是相近的，而通过`__dict__`访问属性多了`a.__dict__['x']`字典访值一步（一个哈希函数的消耗）。由此可以推断出，使用了`__slots__`的类的属性访问速度比没有使用的要快。下面用一个例子验证：
+
+```
+from timeit import repeat
+
+class A(object): pass
+
+class B(object): __slots__ = ('x')
+
+def get_set_del_fn(obj):
+    def get_set_del():
+        obj.x = 1
+        obj.x
+        del obj.x
+    return get_set_del
+
+a = A()
+b = B()
+ta = min(repeat(get_set_del_fn(a)))
+tb = min(repeat(get_set_del_fn(b)))
+print("%.2f%%" % ((ta/tb - 1)*100))
+```
+
+在本人电脑上测试速度有0-20%左右的提升。
+
+2）减少内存消耗
+
+Python内置的字典本质是一个哈希表，它是一种用空间换时间的数据结构。为了解决冲突的问题，当字典使用量超过2/3时，Python会根据情况进行2-4倍的扩容。由此可预见，取消`__dict__`的使用可以大幅减少实例的空间消耗。
+
+下面用`pympler`模块测试在不同属性数目下，使用`__slots__`前后单个实例占用内存大小：
+
+```
+from string import ascii_letters
+from pympler.asizeof import asizesof
+
+def slots_memory(num=0):
+    attrs = list(ascii_letters[:num])
+    class Unslotted(object): pass
+    class Slotted(object): __slots__ = attrs
+    unslotted = Unslotted()
+    slotted = Slotter()
+    for attr in attrs:
+        unslotted.__dict__[attr] = 0
+        exec('slotted.%s = 0' % attr, globals(), locals())
+    memory_use = asizesof(slotted, unslotted, unslotted.__dict__)
+    return memory_use
+
+def slots_test(nums):
+    return [slots_memory(num) for num in nums]
+```
+
+测试结果:（单位：字节）
+
+| 属性数量 | slotted | unslotted(`__dict__`) |
+| -------- | ------- | --------------------- |
+| 0        | 80      | 334(280)              |
+| 1        | 152     | 408(344)              |
+| 2        | 168     | 448(384)              |
+| 8        | 264     | 1456(1392)            |
+| 16       | 392     | 1776(1712)            |
+| 25       | 536     | 4440(4376)            |
+
+从上述结果可看到使用`__slots__`能极大地减少内存空间的消耗，这也是最常见到的用法。
 
 # 二、Gym源码阅读
 
@@ -3839,7 +4171,7 @@ saver.restore(...checkpoint filename...)12345
 
 ## 12、tf.get_collection()
 
-> 从一个结合中取出全部变量，是一个列表;
+> 从一个集合中取出全部变量，是一个列表;
 >
 > `tensorflow`的`collection`提供一个全局的存储机制，不会受到`变量名`生存空间的影响。一处保存，到处可取。
 
@@ -4880,8 +5212,8 @@ with tf.Session() as sess:
 
 ```
 test = np.array([[1, 2, 3], [2, 3, 4], [5, 4, 3], [8, 7, 2]])
-np.argmax(test, 0)　　　＃输出：array([3, 3, 1]
-np.argmax(test, 1)　　　＃输出：array([2, 2, 0, 0]
+np.argmax(test, 0)　　　＃输出：array([3, 3, 1])
+np.argmax(test, 1)　　　＃输出：array([2, 2, 0, 0])
 ```
 
 　　啥意思呢？
@@ -4930,9 +5262,49 @@ TensorFlow中类型转换函数
 tf.cast(a, tf.int32) ==> [1, 2]  # dtype=tf.int32
 ```
 
+## 32、tf.variable_scope和tf.name_scope
+
+管理变量的命名空间，大多数情况下是等价的，唯一的区别是在使用tf.get_variable函数时。
+
+```
+import tensorflow as tf  
+
+with tf.variable_scope("foo"):
+    a = tf.get_variable("bar",[1])
+    print("a.name=",a.name)
+
+with tf.variable_scope("bar"):
+    b = tf.get_variable("bar",[1])
+    print("b.name=",b.name)
+
+with tf.name_scope("a"):
+    # 使用tf.Variable函数生成的变量会受到tf.name_scope影响，于是这个变量的名称为“a/Variable”
+     a = tf.Variable([1])
+     print("a.name=",a.name)
+     # tf.get_variable函数不受tf.name_scope函数的影响
+     # 于是这个变量并不存在于a这个命名空间中。
+     a = tf.get_variable("b",[1])
+     print("a.name=",a.name)
+
+with tf.name_scope("b"):
+    # 因为tf.get_variable不受tf.name_scope影响，所以这里将试图获取名称
+    # 为“a”的变量。然而这个变量已经被声明了，于是这里会报重复声明的错误。
+    # Variable b already exists, disallowed. Did you mean to set reuse=True or reuse=tf.AUTO_REUSE in VarScope?
+    tf.get_variable("b",[1])
+```
+
+输出结果：
+
+```
+a.name= foo/bar:0
+b.name= bar/bar:0
+a.name= a/Variable:0
+a.name= b:0
+```
+
+
+
 # 四、TensorFlow-Mnist
-
-
 
 问题汇总：
 
