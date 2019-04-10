@@ -1,6 +1,8 @@
+# 一、PySC2
 
 
-# 一、Python基本函数
+
+# 二、Python基本函数
 
 ## 1、Python类中方法介绍
 
@@ -499,7 +501,6 @@ True
 
 ```
 
-<<<<<<< Updated upstream
 ## 10、python @property
 
 > **作用：**将（类中）方法转换成属性来进行调用，可以进行读取数据。如果只有@property，则该属性为只读属性。如果加上@***（方法名，或者说属性名）.setter则该属性为可以修改，并且定义的方法可以进行类型检查，及时检测错误。
@@ -2996,7 +2997,86 @@ def slots_test(nums):
 
 从上述结果可看到使用`__slots__`能极大地减少内存空间的消耗，这也是最常见到的用法。
 
-# 二、Gym源码阅读
+## 36、absl.flags
+
+absl.flags定义了分布式命令行系统，取代了getopt(),optparse和人工参数处理。
+
+**介绍**
+
+1）每个Python模块都可以定义对其有用的标志，而不需要在main()函数或者main()函数附近定义所有标志。
+
+2）当1个模块导入另一个模块时，可以访问另一个模块的标志。（通过让所有模块共享一个对象，该对象包含标志信息）
+
+**功能**
+
+- 定义标志类型（boolean,float,integer,list）
+- 自动生成帮助信息
+- 从文件中读取参数
+- 自动从帮助标志中生成手工页面
+
+**实现**
+
+标志通过使用DEFINE_*函数（）来定义（标志的类型是用来定义标志的值）
+
+**实例**
+
+```
+from absl import app
+from absl import flags
+
+FLAGS = flags.FLAGS
+
+# Flag names are globally defined!  So in general, we need to be
+# careful to pick names that are unlikely to be used by other libraries.
+# If there is a conflict, we'll get an error at import time.
+flags.DEFINE_string('name', 'Jane Random', 'Your name.')
+flags.DEFINE_integer('age', None, 'Your age in years.', lower_bound=0)
+flags.DEFINE_boolean('debug', False, 'Produces debugging output.')
+flags.DEFINE_enum('job', 'running', ['running', 'stopped'], 'Job status.')
+
+
+def main(argv):
+  if FLAGS.debug:
+    print('non-flag arguments:', argv)
+  print('Happy Birthday', FLAGS.name)
+  if FLAGS.age is not None:
+    print('You are %d years old, and your job is %s' % (FLAGS.age, FLAGS.job))
+
+
+if __name__ == '__main__':
+  app.run(main)
+```
+
+**标志类型**
+
+This is a list of the `DEFINE_*`’s that you can do. All flags take a name, default value, help-string, and optional ‘short’ name (one-letter name). Some flags have other arguments, which are described with the flag.
+
+- `DEFINE_string`: takes any input and interprets it as a string.
+
+- `DEFINE_bool` or `DEFINE_boolean`: typically does not take an argument: pass `--myflag` to set `FLAGS.myflag` to `True`, or `--nomyflag` to set `FLAGS.myflag` to `False`. `--myflag=true` and `--myflag=false` are also supported, but not recommended.
+- `DEFINE_float`: takes an input and interprets it as a floating point number. This also takes optional arguments `lower_bound` and `upper_bound`; if the number  specified on the command line is out of range, it raises a `FlagError`.
+- `DEFINE_integer`: takes an input and interprets it as an integer. This also takes optional arguments `lower_bound` and `upper_bound` as for floats.
+- `DEFINE_enum`: takes a list of strings that represents legal values. If the command-line value is not in this list, it raises a flag error; otherwise, it assigns to `FLAGS.flag` as a string.
+- `DEFINE_list`: Takes a comma-separated list of strings on the command line and stores them in a Python list object.
+- `DEFINE_spaceseplist`: Takes a space-separated list of strings on the commandline and stores them in a Python list object. For example: `--myspacesepflag "foo bar baz"`
+- `DEFINE_multi_string`: The same as `DEFINE_string`, except the flag can be specified more than once on the command line. The result is a Python list object (list of strings), even if the flag is only on the command line once.
+- `DEFINE_multi_integer`: The same as `DEFINE_integer`, except the flag can be specified more than once on the command line. The result is a Python list object (list of ints), even if the flag is only on the command line once.
+- `DEFINE_multi_enum`: The same as `DEFINE_enum`, except the flag can be specified more than once on the command line. The result is a Python list object (list of strings), even if the flag is only on the command line once.
+
+**特别标志**
+
+  Some flags have special meanings:
+
+- `--help`: prints a list of all key flags (see below).
+
+- `--helpshort`: alias for `--help`.
+- `--helpfull`: prints a list of all the flags in a human-readable fashion.
+- `--helpxml`: prints a list of all flags, in XML format. *Do not* parse the output of `--helpfull` and `--helpshort`. Instead, parse the output of `--helpxml`.
+- `--flagfile=filename`: read flags from file *filename*.
+- `--undefok=f1,f2`: ignore unrecognized option errors for *f1*,*f2*. For boolean flags, you should use `--undefok=boolflag`, and `--boolflag` and `--noboolflag` will be accepted. Do not use `--undefok=noboolflag`.
+- `--`: as in getopt(). This terminates flag-processing.
+
+# 三、Gym源码阅读
 
 ## 1、Discrete类
 
@@ -3059,7 +3139,7 @@ class MultiDiscrete(gym.Space):
 
 
 
-# 三、TensorFlow源码阅读-函数说明
+# 四、TensorFlow源码阅读-函数说明
 
 >  **说明：**1)主要记录平时遇到的tf函数，并且对函数的功能进行简单说明，举出相应的示例理解。
 >
@@ -5302,9 +5382,156 @@ a.name= a/Variable:0
 a.name= b:0
 ```
 
+## 33、tf.transpose（）
+
+tf.transpose(input, [dimension_1, dimenaion_2,..,dimension_n]):
+
+这个函数主要适用于交换输入张量的不同维度用的，如果输入张量是二维，就相当是转置。dimension_n是整数，如果张量是三维，就是用0,1,2来表示。这个列表里的每个数对应相应的维度。如果是[2,1,0]，就把输入张量的第三维度和第一维度交换。
+
+```
+import tensorflow as tf;
+import numpy as np; 
+A = np.array([[1,2,3],[4,5,6]])
+x = tf.transpose(A, [1,0]) 
+B = np.array([[[1,2,3],[4,5,6]]])
+y = tf.transpose(B, [2,1,0])
+with tf.Session() as sess:	
+	print A[1,0]	
+	print sess.run(x[0,1])	
+	print B[0,1,2]	
+	print sess.run(y[2,1,0])
+```
+
+输出：
+
+4
+
+4
+
+6
+
+6
+
+## 34、tf.concat()
+
+tf.concat(  values,     axis,     name='concat' )
 
 
-# 四、TensorFlow-Mnist
+
+```
+t1 = [[1, 2, 3], [4, 5, 6]]
+t2 = [[7, 8, 9], [10, 11, 12]]
+tf.concat([t1, t2], 0)  # [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
+tf.concat([t1, t2], 1)  # [[1, 2, 3, 7, 8, 9], [4, 5, 6, 10, 11, 12]]
+
+# tensor t3 with shape [2, 3]
+# tensor t4 with shape [2, 3]
+tf.shape(tf.concat([t3, t4], 0))  # [4, 3]
+tf.shape(tf.concat([t3, t4], 1))  # [2, 6]
+```
+
+这里解释了当axis=0和axis=1的情况，怎么理解这个axis呢？其实这和numpy中的np.concatenate()用法是一样的。
+
+axis=0     代表在第0个维度拼接
+
+axis=1     代表在第1个维度拼接 
+
+对于一个二维矩阵，第0个维度代表最外层方括号所框下的子集，第1个维度代表内部方括号所框下的子集。维度越高，括号越小。
+
+对于这种情况，我可以再解释清楚一点: 
+
+对于[ [ ], [ ]]和[[ ], [ ]]，低维拼接等于拿掉最外面括号，高维拼接是拿掉里面的括号(保证其他维度不变)。注意：tf.concat()拼接的张量只会改变一个维度，其他维度是保存不变的。比如两个shape为[2,3]的矩阵拼接，要么通过axis=0变成[4,3]，要么通过axis=1变成[2,6]。改变的维度索引对应axis的值。
+
+这样就可以理解多维矩阵的拼接了，可以用axis的设置来从不同维度进行拼接。 
+
+对于三维矩阵的拼接，自然axis取值范围是[0, 1, 2]。
+
+对于axis等于负数的情况
+
+负数在数组索引里面表示倒数(countdown)。比如，对于列表ls = [1,2,3]而言，ls[-1] = 3，表示读取倒数第一个索引对应值。
+
+axis=-1表示倒数第一个维度，对于三维矩阵拼接来说，axis=-1等价于axis=2。同理，axis=-2代表倒数第二个维度，对于三维矩阵拼接来说，axis=-2等价于axis=1。
+
+一般在维度非常高的情况下，我们想在最'高'的维度进行拼接，一般就直接用countdown机制，直接axis=-1就搞定了。
+
+```
+t1 = [[[1, 2], [2, 3]], [[4, 4], [5, 3]]]
+t2 = [[[7, 4], [8, 4]], [[2, 10], [15, 11]]]
+tf.concat([t1, t2], -1)
+```
+
+输出
+
+```
+[[[ 1,  2,  7,  4],
+  [ 2,  3,  8,  4]],
+
+ [[ 4,  4,  2, 10],
+  [ 5,  3, 15, 11]]]
+```
+
+## 35、tf.ConfigProto()
+
+tf.ConfigProto()函数用在创建session的时候，用来对session进行参数配置： 
+
+```
+config = tf.ConfigProto(allow_soft_placement=True, allow_soft_placement=True)
+config.gpu_options.per_process_gpu_memory_fraction = 0.4  #占用40%显存
+sess = tf.Session(config=config)
+```
+
+1. 记录设备指派情况 :  tf.ConfigProto(log_device_placement=True)
+
+
+设置tf.ConfigProto()中参数log_device_placement = True ,可以获取到 operations 和 Tensor 被指派到哪个设备(几号CPU或几号GPU)上运行,会在终端打印出各项操作是在哪个设备上运行的。
+
+
+2. 自动选择运行设备 ： tf.ConfigProto(allow_soft_placement=True)
+
+在tf中，通过命令 "with tf.device('/cpu:0'):",允许手动设置操作运行的设备。如果手动设置的设备不存在或者不可用，就会导致tf程序等待或异常，为了防止这种情况，可以设置tf.ConfigProto()中参数allow_soft_placement=True，允许tf自动选择一个存在并且可用的设备来运行操作。
+
+
+3. 限制GPU资源使用：
+
+ 为了加快运行效率，TensorFlow在初始化时会尝试分配所有可用的GPU显存资源给自己，这在多人使用的服务器上工作就会导致GPU占用，别人无法使用GPU工作的情况。
+
+tf提供了两种控制GPU资源使用的方法，一是让TensorFlow在运行过程中动态申请显存，需要多少就申请多少;第二种方式就是限制GPU的使用率。
+
+
+一、动态申请显存
+
+ config = tf.ConfigProto()
+
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+
+二、限制GPU使用率 
+
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.4  #占用40%显存
+session = tf.Session(config=config)
+
+或者： 
+
+gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.4)
+config=tf.ConfigProto(gpu_options=gpu_options)
+session = tf.Session(config=config)
+
+
+设置使用哪块GPU
+
+方法一、在python程序中设置：
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '0' #使用 GPU 0
+os.environ['CUDA_VISIBLE_DEVICES'] = '0,1' # 使用 GPU 0，1
+
+方法二、在执行python程序时候：
+
+CUDA_VISIBLE_DEVICES=0,1 python yourcode.py
+
+>  原文：https://blog.csdn.net/dcrmg/article/details/79091941 
+
+# 五、TensorFlow-Mnist
 
 问题汇总：
 
@@ -5477,7 +5704,7 @@ if __name__ =="__main__":
 
 
 
-#  五、DQN源码阅读
+#  六、DQN源码阅读
 
 > 2018/8/20
 
