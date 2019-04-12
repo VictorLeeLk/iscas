@@ -5470,7 +5470,7 @@ tf.concat([t1, t2], -1)
   [ 5,  3, 15, 11]]]
 ```
 
-## 35、tf.ConfigProto()
+## 35、tf.ConfigProto()-GPU资源调度
 
 tf.ConfigProto()函数用在创建session的时候，用来对session进行参数配置： 
 
@@ -5530,6 +5530,46 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0,1' # 使用 GPU 0，1
 CUDA_VISIBLE_DEVICES=0,1 python yourcode.py
 
 >  原文：https://blog.csdn.net/dcrmg/article/details/79091941 
+
+## 36、cmd GPU设置
+
+win10下cmd窗口，设置GPU运行程序，出现了无法识别CUDA_VISIABLE_DEVICES的问题。解决方法
+
+服务器中有多个GPU，选择特定的GPU运行程序可在程序运行命令前使用：`CUDA_VISIBLE_DEVICES=0`命令。0为服务器中的GPU编号，可以为0, 1, 2, 3等，表明对程序可见的GPU编号。 
+
+- 命令
+
+```
+CUDA_VISIBLE_DEVICES=1     # 只有编号为1的GPU对程序是可见的，在代码中gpu[0]指的就是这块儿GPU
+CUDA_VISIBLE_DEVICES=0,2,3 # 只有编号为0,2,3的GPU对程序是可见的，在代码中gpu[0]指的是第0块儿，
+						   # gpu[1]指的是第2块儿，gpu[2]指的是第3块儿
+CUDA_VISIBLE_DEVICES=2,0,3 # 只有编号为0,2,3的GPU对程序是可见的，但是在代码中gpu[0]指的是第2块儿，
+						   # gpu[1]指的是第0块儿，gpu[2]指的是第3块儿
+
+```
+
+- 使用
+
+  - 临时设置
+
+    ```
+    Linux： export CUDA_VISIBLE_DEVICES=1
+    windows:  set CUDA_VISIBLE_DEVICES=1
+    ```
+
+  - 永久设置
+
+    ```
+    linux:
+    在~/.bashrc 的最后加上export CUDA_VISIBLE_DEVICES=1，然后source ~/.bashrc
+    windows:
+    打开我的电脑环境变量设置的地方，直接添加就行了。
+    
+    ```
+
+    
+
+​       
 
 # 五、TensorFlow-Mnist
 
