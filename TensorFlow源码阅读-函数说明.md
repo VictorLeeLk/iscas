@@ -1,5 +1,425 @@
 # 一、PySC2
 
+## 1、flags
+
+```
+from absl import flags
+FLAGS = flags.FLAGS
+flags.DEFINE_enum("job_name", 'actor', ['actor', 'learner'], "Job type.")
+flags.DEFINE_enum("policy", 'mlp', ['mlp', 'lstm'], "Job type.")
+flags.DEFINE_integer("unroll_length", 128, "Length of rollout steps.")
+flags.DEFINE_string("learner_ip", "localhost", "Learner IP address.")
+flags.DEFINE_string("port_A", "5700", "Port for transporting model.")
+flags.DEFINE_string("port_B", "5701", "Port for transporting data.")
+flags.DEFINE_string("game_version", '4.6', "Game core version.")
+flags.DEFINE_float("discount_gamma", 0.998, "Discount factor.")
+flags.DEFINE_float("lambda_return", 0.95, "Lambda return factor.")
+flags.DEFINE_float("clip_range", 0.1, "Clip range for PPO.")
+flags.DEFINE_float("ent_coef", 0.01, "Coefficient for the entropy term.")
+flags.DEFINE_float("vf_coef", 0.5, "Coefficient for the value loss.")
+flags.DEFINE_float("learn_act_speed_ratio", 0, "Maximum learner/actor ratio.")
+flags.DEFINE_integer("batch_size", 32, "Batch size.")
+flags.DEFINE_integer("game_steps_per_episode", 43200, "Maximum steps per episode.")
+flags.DEFINE_integer("learner_queue_size", 1024, "Size of learner's unroll queue.")
+flags.DEFINE_integer("step_mul", 32, "Game steps per agent step.")
+flags.DEFINE_string("difficulties", '1,2,4,6,9,A', "Bot's strengths.")
+flags.DEFINE_float("learning_rate", 1e-5, "Learning rate.")
+flags.DEFINE_string("init_model_path", None, "Initial model path.")
+flags.DEFINE_string("save_dir", "./checkpoints/", "Dir to save models to")
+flags.DEFINE_integer("save_interval", 50000, "Model saving frequency.")
+flags.DEFINE_integer("print_interval", 1000, "Print train cost frequency.")
+flags.DEFINE_boolean("disable_fog", False, "Disable fog-of-war.")
+flags.DEFINE_boolean("use_all_combat_actions", False, "Use all combat actions.")
+flags.DEFINE_boolean("use_region_features", False, "Use region features")
+flags.DEFINE_boolean("use_action_mask", True, "Use region-wise combat.")
+flags.DEFINE_boolean("use_reward_shaping", False, "Use reward shaping.")
+flags.FLAGS(sys.argv)
+```
+
+## 2、observation_spec()
+
+```
+def observation_spec(self):
+    """The observation spec for the SC2 environment.
+
+    It's worth noting that the image-like observations are in y,x/row,column
+    order which is different than the actions which are in x,y order. This is
+    due to conflicting conventions, and to facilitate printing of the images.
+
+    Returns:
+      The dict of observation names to their tensor shapes. Shapes with a 0 can
+      vary in length, for example the number of valid actions depends on which
+      units you have selected.
+    """
+    obs_spec = named_array.NamedDict({
+        "action_result": (0,),  # See error.proto: ActionResult.
+        "alerts": (0,),  # See sc2api.proto: Alert.
+        "available_actions": (0,),
+        "build_queue": (0, len(UnitLayer)),  # pytype: disable=wrong-arg-types
+        "cargo": (0, len(UnitLayer)),  # pytype: disable=wrong-arg-types
+        "cargo_slots_available": (1,),
+        "control_groups": (10, 2),
+        "game_loop": (1,),
+        "last_actions": (0,),
+        "multi_select": (0, len(UnitLayer)),  # pytype: disable=wrong-arg-types
+        "player": (len(Player),),  # pytype: disable=wrong-arg-types
+        "score_cumulative": (len(ScoreCumulative),),  # pytype: disable=wrong-arg-types
+        "score_by_category": (len(ScoreByCategory), len(ScoreCategories)),  # pytype: disable=wrong-arg-types
+        "score_by_vital": (len(ScoreByVital), len(ScoreVitals)),  # pytype: disable=wrong-arg-types
+        "single_select": (0, len(UnitLayer)),  # Only (n, 7) for n in (0, 1).  # pytype: disable=wrong-arg-types
+    })
+
+    aif = self._agent_interface_format
+
+    if aif.feature_dimensions:
+      obs_spec["feature_screen"] = (len(SCREEN_FEATURES),
+                                    aif.feature_dimensions.screen.y,
+                                    aif.feature_dimensions.screen.x)
+
+      obs_spec["feature_minimap"] = (len(MINIMAP_FEATURES),
+                                     aif.feature_dimensions.minimap.y,
+                                     aif.feature_dimensions.minimap.x)
+    if aif.rgb_dimensions:
+      obs_spec["rgb_screen"] = (aif.rgb_dimensions.screen.y,
+                                aif.rgb_dimensions.screen.x,
+                                3)
+      obs_spec["rgb_minimap"] = (aif.rgb_dimensions.minimap.y,
+                                 aif.rgb_dimensions.minimap.x,
+                                 3)
+    if aif.use_feature_units:
+      obs_spec["feature_units"] = (0, len(FeatureUnit))  # pytype: disable=wrong-arg-types
+
+    if aif.use_raw_units:
+      obs_spec["raw_units"] = (0, len(FeatureUnit))
+
+    if aif.use_unit_counts:
+      obs_spec["unit_counts"] = (0, len(UnitCounts))
+
+    if aif.use_camera_position:
+      obs_spec["camera_position"] = (2,)
+    return obs_spec
+```
+
+## 3、AgentInterfaceFormat
+
+```
+class AgentInterfaceFormat(object):
+  """Observation and action interface format specific to a particular agent."""
+
+  def __init__(
+      self,
+      feature_dimensions=None,
+      rgb_dimensions=None,
+      action_space=None,
+      camera_width_world_units=None,
+      use_feature_units=False,
+      use_raw_units=False,
+      use_unit_counts=False,
+      use_camera_position=False,
+      hide_specific_actions=True):
+    """Initializer.
+
+    Args:
+      feature_dimensions: Feature layer `Dimension`s. Either this or
+          rgb_dimensions (or both) must be set.
+      rgb_dimensions: RGB `Dimension`. Either this or feature_dimensions
+          (or both) must be set.
+      action_space: If you pass both feature and rgb sizes, then you must also
+          specify which you want to use for your actions as an ActionSpace enum.
+      camera_width_world_units: The width of your screen in world units. If your
+          feature_dimensions.screen=(64, 48) and camera_width is 24, then each
+          px represents 24 / 64 = 0.375 world units in each of x and y.
+          It'll then represent a camera of size (24, 0.375 * 48) = (24, 18)
+          world units.
+      use_feature_units: Whether to include feature unit data in observations.
+      use_raw_units: Whether to include raw unit data in observations. This
+          differs from feature_units because it includes units outside the
+          screen and hidden units, and because unit positions are given in
+          terms of world units instead of screen units.
+      use_unit_counts: Whether to include unit_counts observation. Disabled by
+          default since it gives information outside the visible area.
+      use_camera_position: Whether to include the camera's position (in world
+          units) in the observations.
+      hide_specific_actions: [bool] Some actions (eg cancel) have many
+          specific versions (cancel this building, cancel that spell) and can
+          be represented in a more general form. If a specific action is
+          available, the general will also be available. If you set
+          `hide_specific_actions` to False, the specific versions will also be
+          available, but if it's True, the specific ones will be hidden.
+          Similarly, when transforming back, a specific action will be returned
+          as the general action. This simplifies the action space, though can
+          lead to some actions in replays not being exactly representable using
+          only the general actions.
+
+    Raises:
+      ValueError: if the parameters are inconsistent.
+    """
+
+    if not feature_dimensions and not rgb_dimensions:
+      raise ValueError("Must set either the feature layer or rgb dimensions.")
+
+    if action_space:
+      if not isinstance(action_space, actions.ActionSpace):
+        raise ValueError("action_space must be of type ActionSpace.")
+
+      if ((action_space == actions.ActionSpace.FEATURES and
+           not feature_dimensions) or
+          (action_space == actions.ActionSpace.RGB and
+           not rgb_dimensions)):
+        raise ValueError(
+            "Action space must match the observations, action space={}, "
+            "feature_dimensions={}, rgb_dimensions={}".format(
+                action_space, feature_dimensions, rgb_dimensions))
+    else:
+      if feature_dimensions and rgb_dimensions:
+        raise ValueError(
+            "You must specify the action space if you have both screen and "
+            "rgb observations.")
+      elif feature_dimensions:
+        action_space = actions.ActionSpace.FEATURES
+      else:
+        action_space = actions.ActionSpace.RGB
+
+    self._feature_dimensions = feature_dimensions
+    self._rgb_dimensions = rgb_dimensions
+    self._action_space = action_space
+    self._camera_width_world_units = camera_width_world_units or 24
+    self._use_feature_units = use_feature_units
+    self._use_raw_units = use_raw_units
+    self._use_unit_counts = use_unit_counts
+    self._use_camera_position = use_camera_position
+    self._hide_specific_actions = hide_specific_actions
+
+    if action_space == actions.ActionSpace.FEATURES:
+      self._action_dimensions = feature_dimensions
+    else:
+      self._action_dimensions = rgb_dimensions
+
+  @property
+  def feature_dimensions(self):
+    return self._feature_dimensions
+
+  @property
+  def rgb_dimensions(self):
+    return self._rgb_dimensions
+
+  @property
+  def action_space(self):
+    return self._action_space
+
+  @property
+  def camera_width_world_units(self):
+    return self._camera_width_world_units
+
+  @property
+  def use_feature_units(self):
+    return self._use_feature_units
+
+  @property
+  def use_raw_units(self):
+    return self._use_raw_units
+
+  @property
+  def use_unit_counts(self):
+    return self._use_unit_counts
+
+  @property
+  def use_camera_position(self):
+    return self._use_camera_position
+
+  @property
+  def hide_specific_actions(self):
+    return self._hide_specific_actions
+
+  @property
+  def action_dimensions(self):
+    return self._action_dimensions
+```
+
+## 4、obs(TimeStep)
+
+- obs.type
+
+  `<class 'pysc2.env.environment.TimeStep'>`
+
+- len(obs):4
+
+- obs.observation取值：两种方式，一种是字典，另一种直接按属性索引。其类型type(obs.observation)=`<class 'pysc2.lib.name_array.NameDict'>`
+
+  - obs.observation['feature_units']
+  - obs.observation.feature_units
+
+  定义如下：
+
+  ```
+  class NamedDict(dict):
+    """A dict where you can use `d["element"]` or `d.element`."""
+  
+    def __init__(self, *args, **kwargs):
+      super(NamedDict, self).__init__(*args, **kwargs)
+      self.__dict__ = self
+  ```
+
+  
+
+- obs.observation.feature_units
+
+  - type:`<class 'pysc2.lib.named_array.NamedNumpyArray'>`
+
+    ```
+  class NamedNumpyArray(np.ndarray):
+    """A subclass of ndarray that lets you give names to indices.
+  
+    This is a normal ndarray in the sense that you can always index by numbers and
+    slices, though elipses don't work. Also, all elements have the same type,
+    unlike a record array.
+  
+    Names should be a list of names per dimension in the ndarray shape. The names
+    should be a list or tuple of strings, a namedtuple class (with names taken
+    from _fields), or an IntEnum. Alternatively if you don't want to give a name
+    to a particular dimension, use None. If your array only has one dimension, the
+    second level of list can be skipped.
+  
+    Example usage:
+      a = named_array.NamedNumpyArray([1, 3, 6], ["a", "b", "c"])
+      a.a, a[1], a["c"] => 1, 3, 6
+      b = named_array.NamedNumpyArray([[1, 3], [6, 8]], [["a", "b"], None])
+      b.a, b[1], b["a", 1] => [1, 3], [6, 8], 3
+      c = named_array.NamedNumpyArray([[1, 3], [6, 8]], [None, ["a", "b"]])
+      c[0].a, b[1, 0], b[1, "b"] => 1, 6, 8
+    Look at the tests for more examples including using enums and named tuples.
+    """
+    ```
+
+## 5、FeatureUnit
+
+   ```
+class FeatureUnit(enum.IntEnum):
+  """Indices for the `feature_unit` observations."""
+  unit_type = 0
+  alliance = 1
+  health = 2
+  shield = 3
+  energy = 4
+  cargo_space_taken = 5
+  build_progress = 6
+  health_ratio = 7
+  shield_ratio = 8
+  energy_ratio = 9
+  display_type = 10
+  owner = 11
+  x = 12
+  y = 13
+  facing = 14
+  radius = 15
+  cloak = 16
+  is_selected = 17
+  is_blip = 18
+  is_powered = 19
+  mineral_contents = 20
+  vespene_contents = 21
+  cargo_space_max = 22
+  assigned_harvesters = 23
+  ideal_harvesters = 24
+  weapon_cooldown = 25
+  order_length = 26  # If zero, the unit is idle.
+  tag = 27  # Unique identifier for a unit (only populated for raw units).
+   ```
+
+ 
+
+```
+def get_units_by_type(self,obs,unit_type):
+		"""观察空间里面特征单元是否有指定的单元类型，并且全部返回"""
+		import pdb
+		pdb.set_trace()
+		print(type(obs.observation.feature_units))  #<class 'pysc2.lib.named_array.NameNumpyArray'>
+		print(obs.observation.feature_units.shape)  #(27,28)
+		return [unit for unit in obs.observation.feature_units
+				 if unit.unit_type == unit_type]
+```
+
+ 说明该 feature_units有27个unit,每个unit类型为FeatureUnit
+
+## 6、FunctionCall
+
+```
+class FunctionCall(collections.namedtuple(
+    "FunctionCall", ["function", "arguments"])):
+  """Represents a function call action.
+
+  Attributes:
+    function: Store the function id, eg 2 for select_point.
+    arguments: The list of arguments for that function, each being a list of
+        ints. For select_point this could be: [[0], [23, 38]].
+  """
+  __slots__ = ()
+
+  @classmethod
+  def init_with_validation(cls, function, arguments):
+    """Return a `FunctionCall` given some validation for the function and args.
+
+    Args:
+      function: A function name or id, to be converted into a function id enum.
+      arguments: An iterable of function arguments. Arguments that are enum
+          types can be passed by name. Arguments that only take one value (ie
+          not a point) don't need to be wrapped in a list.
+
+    Returns:
+      A new `FunctionCall` instance.
+
+    Raises:
+      KeyError: if the enum name doesn't exist.
+      ValueError: if the enum id doesn't exist.
+    """
+    func = FUNCTIONS[function]
+    args = []
+    for arg, arg_type in zip(arguments, func.args):
+      if arg_type.values:  # Allow enum values by name or int.
+        if isinstance(arg, six.string_types):
+          try:
+            args.append([arg_type.values[arg]])
+          except KeyError:
+            raise KeyError("Unknown argument value: %s, valid values: %s" % (
+                arg, [v.name for v in arg_type.values]))
+        else:
+          if isinstance(arg, (list, tuple)):
+            arg = arg[0]
+          try:
+            args.append([arg_type.values(arg)])
+          except ValueError:
+            raise ValueError("Unknown argument value: %s, valid values: %s" % (
+                arg, list(arg_type.values)))
+      elif isinstance(arg, int):  # Allow bare ints.
+        args.append([arg])
+      else:  # Allow tuples or iterators.
+        args.append(list(arg))
+    return cls(func.id, args)
+
+  @classmethod
+  def all_arguments(cls, function, arguments):
+    """Helper function for creating `FunctionCall`s with `Arguments`.
+
+    Args:
+      function: The value to store for the action function.
+      arguments: The values to store for the arguments of the action. Can either
+        be an `Arguments` object, a `dict`, or an iterable. If a `dict` or an
+        iterable is provided, the values will be unpacked into an `Arguments`
+        object.
+
+    Returns:
+      A new `FunctionCall` instance.
+    """
+    if isinstance(arguments, dict):
+      arguments = Arguments(**arguments)
+    elif not isinstance(arguments, Arguments):
+      arguments = Arguments(*arguments)
+    return cls(function, arguments)
+
+  def __reduce__(self):
+    return self.__class__, tuple(self)
+```
+
 
 
 # 二、Python基本函数
@@ -3068,13 +3488,118 @@ This is a list of the `DEFINE_*`’s that you can do. All flags take a name, def
   Some flags have special meanings:
 
 - `--help`: prints a list of all key flags (see below).
-
 - `--helpshort`: alias for `--help`.
 - `--helpfull`: prints a list of all the flags in a human-readable fashion.
 - `--helpxml`: prints a list of all flags, in XML format. *Do not* parse the output of `--helpfull` and `--helpshort`. Instead, parse the output of `--helpxml`.
 - `--flagfile=filename`: read flags from file *filename*.
 - `--undefok=f1,f2`: ignore unrecognized option errors for *f1*,*f2*. For boolean flags, you should use `--undefok=boolflag`, and `--boolflag` and `--noboolflag` will be accepted. Do not use `--undefok=noboolflag`.
 - `--`: as in getopt(). This terminates flag-processing.
+
+## 37、python参数取出（元组和字典）
+
+- 元组
+
+  The reverse situation occurs when the arguments are already in a list or tuple but need to be unpacked for a function call requiring separate positional arguments. For instance, the built-in [`range()`](https://docs.python.org/2.7/library/functions.html#range) function expects separate *start* and *stop* arguments. If they are not available separately, write the function call with the `*`-operator to unpack the arguments out of a list or tuple: 
+
+```
+>>> range(3, 6)             # normal call with separate arguments
+[3, 4, 5]
+>>> args = [3, 6]
+>>> range(*args)            # call with arguments unpacked from a list
+[3, 4, 5]
+```
+
+- 字典
+
+  In the same fashion, dictionaries can deliver keyword arguments with the `**`-operator: 
+
+```
+>>> def parrot(voltage, state='a stiff', action='voom'):
+...     print "-- This parrot wouldn't", action,
+...     print "if you put", voltage, "volts through it.",
+...     print "E's", state, "!"
+...
+>>> d = {"voltage": "four million", "state": "bleedin' demised", "action": "VOOM"}
+>>> parrot(**d)
+-- This parrot wouldn't VOOM if you put four million volts through it. E's bleedin' demised !
+```
+
+## 38、numpy reshape
+
+```
+numpy.reshape(a, newshape, order='C')
+Gives a new shape to an array without changing its data.
+```
+
+```
+>>> a = np.arange(6).reshape((3, 2))
+>>> a
+array([[0, 1],
+       [2, 3],
+       [4, 5]])
+```
+
+```
+>>> np.reshape(a, (2, 3)) # C-like index ordering
+array([[0, 1, 2],
+       [3, 4, 5]])
+>>> np.reshape(np.ravel(a), (2, 3)) # equivalent to C ravel then C reshape
+array([[0, 1, 2],
+       [3, 4, 5]])
+>>> np.reshape(a, (2, 3), order='F') # Fortran-like index ordering
+array([[0, 4, 3],
+       [2, 1, 5]])
+>>> np.reshape(np.ravel(a, order='F'), (2, 3), order='F')
+array([[0, 4, 3],
+       [2, 1, 5]])
+```
+
+```
+>>> a = np.array([[1,2,3], [4,5,6]])
+>>> np.reshape(a, 6)
+array([1, 2, 3, 4, 5, 6])
+>>> np.reshape(a, 6, order='F')
+array([1, 4, 2, 5, 3, 6])
+```
+
+```
+>>> np.reshape(a, (3,-1))       # the unspecified value is inferred to be 2
+array([[1, 2],
+       [3, 4],
+       [5, 6]])
+```
+
+## 39、python多进程
+
+python 多进程处理单元 multiprocessing 
+
+- **线程**用于小任务，而**进程**用于更多的'重量级'的任务- 应用基本执行。 一个**线程**和**进程**之间的另一个**区别**是，在同一**进程**中的**线程**共享相同的地址空间，而不同的**进程**没有。 因此**线程**可以读写同样的数据结构和变量，便于**线程**之间的通信。 ... 定义方面：**进程**是程序在某个数据集合上的一次运行活动；**线程**是**进程**中的一个执行路径。
+- 进程与线程区别
+  - 多线程使用的是CPU的一个核，适合IO密集型
+  - 多进程使用的是CPU的多个核，适合运算密集型
+
+**1）multiprocessing的方法**
+
+  cpu_count()：统计cpu总数
+
+  active_children()：获取所有子进程
+
+```
+#!/usr/bin/env python
+import multiprocessing
+ 
+p = multiprocessing.cpu_count()
+m = multiprocessing.active_children()
+ 
+print(p)
+print(m)
+```
+
+运行结果：
+
+8
+
+[]
 
 # 三、Gym源码阅读
 
@@ -3144,6 +3669,13 @@ class MultiDiscrete(gym.Space):
 >  **说明：**1)主要记录平时遇到的tf函数，并且对函数的功能进行简单说明，举出相应的示例理解。
 >
 >  	    2)numpy函数以及相关python3相关函数说明
+>  	    
+
+参考文献：
+
+https://www.tensorflow.org/guide?hl=zh-CN
+
+
 
 ## 1、tf.ConfigProto()
 
@@ -5416,8 +5948,6 @@ with tf.Session() as sess:
 
 tf.concat(  values,     axis,     name='concat' )
 
-
-
 ```
 t1 = [[1, 2, 3], [4, 5, 6]]
 t2 = [[7, 8, 9], [10, 11, 12]]
@@ -5567,9 +6097,81 @@ CUDA_VISIBLE_DEVICES=2,0,3 # 只有编号为0,2,3的GPU对程序是可见的，�
     
     ```
 
-    
 
-​       
+   
+
+## 37、tf.train.Save()
+
+[`tf.train.Saver`](https://www.tensorflow.org/api_docs/python/tf/train/Saver?hl=zh-CN) 类提供了保存和恢复模型的方法。通过 [`tf.saved_model.simple_save`](https://www.tensorflow.org/api_docs/python/tf/saved_model/simple_save?hl=zh-CN) 函数可轻松地[保存适合投入使用的模型](https://www.tensorflow.org/api_docs/python/tf/saved_model?hl=zh-CN)。 [Estimator](https://www.tensorflow.org/guide/a href="../guide/estimators">Estimators 会自动保存和恢复 `model_dir` 中的变量。
+
+  保存和恢复变量
+
+ TensorFlow [变量](https://www.tensorflow.org/guide/variables?hl=zh-CN)是表示由程序操作的共享持久状态的最佳方法。[`tf.train.Saver`](https://www.tensorflow.org/api_docs/python/tf/train/Saver?hl=zh-CN) 构造函数会针对图中所有变量或指定列表的变量将 `save` 和 `restore` 操作添加到图中。`Saver` 对象提供了运行这些操作的方法，并指定写入或读取检查点文件的路径
+
+`Saver` 会恢复已经在模型中定义的所有变量。如果您在不知道如何构建图的情况下加载模型（例如，如果您要编写用于加载各种模型的通用程序），那么请阅读本文档后面的[保存和恢复模型概述](https://www.tensorflow.org/guide/saved_model?hl=zh-CN#models)部分。
+
+TensorFlow 将变量保存在二进制检查点文件中，这类文件会将变量名称映射到张量值。
+
+**保存变量**
+
+ 创建 `Saver`（使用 `tf.train.Saver()`）来管理模型中的所有变量。例如，以下代码段展示了如何调用 [`tf.train.Saver.save`](https://www.tensorflow.org/api_docs/python/tf/train/Saver?hl=zh-CN#save) 方法以将变量保存到检查点文件中：
+
+```
+# Create some variables.
+v1 = tf.get_variable("v1", shape=[3], initializer = tf.zeros_initializer)
+v2 = tf.get_variable("v2", shape=[5], initializer = tf.zeros_initializer)
+
+inc_v1 = v1.assign(v1+1)
+dec_v2 = v2.assign(v2-1)
+
+# Add an op to initialize the variables.
+init_op = tf.global_variables_initializer()
+
+# Add ops to save and restore all the variables.
+saver = tf.train.Saver()
+
+# Later, launch the model, initialize the variables, do some work, and save the
+# variables to disk.
+with tf.Session() as sess:
+  sess.run(init_op)
+  # Do some work with the model.
+  inc_v1.op.run()
+  dec_v2.op.run()
+  # Save the variables to disk.
+  save_path = saver.save(sess, "/tmp/model.ckpt")
+  print("Model saved in path: %s" % save_path)
+```
+
+**恢复变量**
+
+  [`tf.train.Saver`](https://www.tensorflow.org/api_docs/python/tf/train/Saver?hl=zh-CN) 对象不仅将变量保存到检查点文件中，还将恢复变量。请注意，当您恢复变量时，您不必事先将其初始化。例如，以下代码段展示了如何调用 [`tf.train.Saver.restore`](https://www.tensorflow.org/api_docs/python/tf/train/Saver?hl=zh-CN#restore) 方法以从检查点文件中恢复变量：
+
+```
+tf.reset_default_graph()
+
+# Create some variables.
+v1 = tf.get_variable("v1", shape=[3])
+v2 = tf.get_variable("v2", shape=[5])
+
+# Add ops to save and restore all the variables.
+saver = tf.train.Saver()
+
+# Later, launch the model, use the saver to restore variables from disk, and
+# do some work with the model.
+with tf.Session() as sess:
+  # Restore variables from disk.
+  saver.restore(sess, "/tmp/model.ckpt")
+  print("Model restored.")
+  # Check the values of the variables
+  print("v1 : %s" % v1.eval())
+  print("v2 : %s" % v2.eval())
+```
+
+
+
+
+
+
 
 # 五、TensorFlow-Mnist
 
