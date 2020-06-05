@@ -260,8 +260,6 @@ class AgentInterfaceFormat(object):
       self.__dict__ = self
   ```
 
-  
-
 - obs.observation.feature_units
 
   - type:`<class 'pysc2.lib.named_array.NamedNumpyArray'>`
@@ -3601,6 +3599,532 @@ print(m)
 
 []
 
+## 40、numpy axis
+
+>  参考:1)https://zhuanlan.zhihu.com/p/31275071
+>
+>           2):https://zhuanlan.zhihu.com/p/30960190
+
+- axis表示数组层级
+- **设axis=i,则numpy沿着第i个下标变化的方向进行操作**
+
+二维数组：
+
+a=np.array([[1,2,3],[4,5,6]]),a.shape=(2,3)
+$$
+a=\begin{bmatrix} a[0][0] & a[0][1] & a[0][2]\\ a[1][0] &a[1][1] & a[1][2] \\ \end{bmatrix}
+$$
+np.sum(a,axis=0)=array([5,7,9]
+
+
+
+## 41、numpy append
+
+numpy.append(arr, values, axis=None):
+
+简答来说，就是arr和values会重新组合成一个新的数组，做为返回值。而axis是一个可选的值
+
+当axis无定义时，是横向加成，返回总是为一维数组！
+
+例子：
+
+```
+    >>> np.append([1, 2, 3], [[4, 5, 6], [7, 8, 9]])
+    array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+```
+
+当axis有定义的时候，分别为0和1的时候。（注意加载的时候，数组要设置好，行数或者列数要相同。不然会有error：all the input array dimensions except for the concatenation axis must match exactly）
+当axis为0时，数组是加在下面（列数要相同）：
+
+```
+import numpy as np
+aa= np.zeros((1,8))
+bb=np.ones((3,8))
+c = np.append(aa,bb,axis = 0)
+print(c)
+[[ 0.  0.  0.  0.  0.  0.  0.  0.][ 1. 1. 1. 1. 1. 1. 1. 1.]
+ [ 1.  1.  1.  1.  1.  1.  1.  1.][ 1. 1. 1. 1. 1. 1. 1. 1.]]
+```
+
+当axis为1时，数组是加在右边（行数要相同）：
+
+```
+import numpy as np
+aa= np.zeros((3,8))
+bb=np.ones((3,1))
+c = np.append(aa,bb,axis = 1)
+print(c)
+[[ 0.  0.  0.  0.  0.  0.  0.  0.  1.]
+ [ 0. 0. 0. 0. 0. 0. 0. 0. 1.]
+ [ 0.  0.  0.  0.  0.  0.  0.  0.  1.]]
+```
+
+## 42、argparse.ArgumentParser
+
+[`argparse`](https://docs.python.org/zh-cn/3/library/argparse.html#module-argparse) 模块可以让人轻松编写用户友好的**命令行接口**。程序定义它需要的参数，然后 [`argparse`](https://docs.python.org/zh-cn/3/library/argparse.html#module-argparse) 将弄清如何从 [`sys.argv`](https://docs.python.org/zh-cn/3/library/sys.html#sys.argv) 解析出那些参数。 [`argparse`](https://docs.python.org/zh-cn/3/library/argparse.html#module-argparse) 模块还会自动生成帮助和使用手册，并在用户给程序传入无效参数时报出错误信息。
+
+１.**创建一个解析器　**
+
+使用 [`argparse`](https://docs.python.org/zh-cn/3/library/argparse.html#module-argparse) 的第一步是创建一个 [`ArgumentParser`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser) 对象：
+
+```
+>>> parser = argparse.ArgumentParser(description='Process some integers.')
+```
+
+[`ArgumentParser`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser) 对象包含将**命令行解析成 Python 数据类型所需的全部信息**。
+
+２. **添加参数**
+
+给一个 [`ArgumentParser`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser) 添加程序参数信息是通过调用 [`add_argument()`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser.add_argument) 方法完成的。通常，这些调用指定 [`ArgumentParser`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser) 如何获取命令行字符串并将其转换为对象。这些信息在 [`parse_args()`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser.parse_args) 调用时被存储和使用。例如：
+
+```
+>>> parser.add_argument('integers', metavar='N', type=int, nargs='+',
+...                     help='an integer for the accumulator')
+>>> parser.add_argument('--sum', dest='accumulate', action='store_const',
+...                     const=sum, default=max,
+...                     help='sum the integers (default: find the max)')
+```
+
+稍后，调用 [`parse_args()`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser.parse_args) 将返回一个具有 `integers` 和 `accumulate` 两个属性的对象。`integers` 属性将是一个包含一个或多个整数的列表，而 `accumulate` 属性当命令行中指定了 `--sum` 参数时将是 [`sum()`](https://docs.python.org/zh-cn/3/library/functions.html#sum) 函数，否则则是 [`max()`](https://docs.python.org/zh-cn/3/library/functions.html#max) 函数。
+
+3. **解析参数**
+
+[`ArgumentParser`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser) 通过 [`parse_args()`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser.parse_args) 方法解析参数。它将检查命令行，把每个参数转换为适当的类型然后调用相应的操作。在大多数情况下，这意味着一个简单的 [`Namespace`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.Namespace) 对象将从命令行参数中解析出的属性构建：
+
+```
+>>> parser.parse_args(['--sum', '7', '-1', '42'])
+Namespace(accumulate=<built-in function sum>, integers=[7, -1, 42])
+```
+
+在脚本中，通常 [`parse_args()`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser.parse_args) 会被不带参数调用，而 [`ArgumentParser`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser) 将自动从 [`sys.argv`](https://docs.python.org/zh-cn/3/library/sys.html#sys.argv) 中确定命令行参数。
+
+**ArgumentParser 对象**
+
+- *class* `argparse.``ArgumentParser`(*prog=None*, *usage=None*, *description=None*, *epilog=None*, *parents=[]*, *formatter_class=argparse.HelpFormatter*, *prefix_chars='-'*, *fromfile_prefix_chars=None*, *argument_default=None*, *conflict_handler='error'*, *add_help=True*, *allow_abbrev=True*)
+
+  创建一个新的 [`ArgumentParser`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser) 对象。所有的参数都应当作为关键字参数传入。每个参数在下面都有它更详细的描述，但简而言之，它们是：
+
+  [prog](https://docs.python.org/zh-cn/3/library/argparse.html#prog) - 程序的名称（默认：`sys.argv[0]`）
+
+  [usage](https://docs.python.org/zh-cn/3/library/argparse.html#usage) - 描述程序用途的字符串（默认值：从添加到解析器的参数生成）
+
+  [description](https://docs.python.org/zh-cn/3/library/argparse.html#description) - 在参数帮助文档之前显示的文本（默认值：无）[epilog](https://docs.python.org/zh-cn/3/library/argparse.html#epilog) - 在参数帮助文档之后显示的文本（默认值：无）
+
+  [parents](https://docs.python.org/zh-cn/3/library/argparse.html#parents) - 一个 [`ArgumentParser`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser) 对象的列表，它们的参数也应包含在内
+
+  [formatter_class](https://docs.python.org/zh-cn/3/library/argparse.html#formatter-class) - 用于自定义帮助文档输出格式的类
+
+  [prefix_chars](https://docs.python.org/zh-cn/3/library/argparse.html#prefix-chars) - 可选参数的前缀字符集合（默认值：'-'）
+
+  [fromfile_prefix_chars](https://docs.python.org/zh-cn/3/library/argparse.html#fromfile-prefix-chars) - 当需要从文件中读取其他参数时，用于标识文件名的前缀字符集合（默认值：`None`）
+
+  [argument_default](https://docs.python.org/zh-cn/3/library/argparse.html#argument-default) - 参数的全局默认值（默认值： `None`）
+
+  [conflict_handler](https://docs.python.org/zh-cn/3/library/argparse.html#conflict-handler) - 解决冲突选项的策略（通常是不必要的）
+
+  [add_help](https://docs.python.org/zh-cn/3/library/argparse.html#add-help) - 为解析器添加一个 `-h/--help` 选项（默认值： `True`）
+
+  [allow_abbrev](https://docs.python.org/zh-cn/3/library/argparse.html#allow-abbrev) - 如果缩写是无歧义的，则允许缩写长选项 （默认值：`True`）
+
+**add_argument() 方法**
+
+- `ArgumentParser.``add_argument`(*name or flags...*[, *action*][, *nargs*][, *const*][, *default*][, *type*][, *choices*][, *required*][, *help*][, *metavar*][, *dest*])
+
+  定义单个的命令行参数应当如何解析。每个形参都在下面有它自己更多的描述，长话短说有：
+
+  [name or flags](https://docs.python.org/zh-cn/3/library/argparse.html#name-or-flags) - 一个命名或者一个选项字符串的列表，例如 `foo` 或 `-f, --foo`。
+
+  [action](https://docs.python.org/zh-cn/3/library/argparse.html#action) - 当参数在命令行中出现时使用的动作基本类型。
+
+  [nargs](https://docs.python.org/zh-cn/3/library/argparse.html#nargs) - 命令行参数应当消耗的数目。
+
+  [const](https://docs.python.org/zh-cn/3/library/argparse.html#const) - 被一些 [action](https://docs.python.org/zh-cn/3/library/argparse.html#action) 和 [nargs](https://docs.python.org/zh-cn/3/library/argparse.html#nargs) 选择所需求的常数。
+
+  [default](https://docs.python.org/zh-cn/3/library/argparse.html#default) - 当参数未在命令行中出现时使用的值。
+
+  [type](https://docs.python.org/zh-cn/3/library/argparse.html#type) - 命令行参数应当被转换成的类型。[choices](https://docs.python.org/zh-cn/3/library/argparse.html#choices) - 可用的参数的容器。
+
+  [required](https://docs.python.org/zh-cn/3/library/argparse.html#required) - 此命令行选项是否可省略 （仅选项可用）。
+
+  [help](https://docs.python.org/zh-cn/3/library/argparse.html#help) - 一个此选项作用的简单描述。[metavar](https://docs.python.org/zh-cn/3/library/argparse.html#metavar) - 在使用方法消息中使用的参数值示例。
+
+  [dest](https://docs.python.org/zh-cn/3/library/argparse.html#dest) - 被添加到 [`parse_args()`](https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser.parse_args) 所返回对象上的属性名。
+
+
+
+
+
+## 43、python参数
+
+> 参数定义的顺序必须是：必选参数、默认参数、可变参数和关键字参数。
+
+- **必选参数（或者叫位置参数）**
+
+函数定义中只提供了行参，没有提供默认值。函数调用时需赋值。例如以下函数，ｘ为必选参数.
+
+```
+def power(x):
+	return x * x
+	pass
+```
+
+
+
+- **默认参数**
+
+  函数定义中提供了参数的默认值，调用时不重新赋值的话为默认值。例如一下函数，ｎ为默认参数，如果不赋值，则为平方操作；如果赋值为其他数，则为ｘ的ｎ次方.
+
+  ```
+  def power(x,n = 2):
+  	while n > 0:
+  		n = n-1
+  		x = x * n
+  	return x 
+  	pass
+  ```
+
+- **可变参数**
+
+  当传递给函数的参数数量不确定时，可以考虑采用可变参数。参数的数量可以是1个、2个到任意个，还可以是0个。
+
+  ```
+  def calc(*numbers):
+      sum = 0
+      for n in numbers:
+          sum = sum + n * n
+      return sum
+  ```
+
+  定义可变参数和定义list或tuple参数相比，仅仅在参数前面加了一个`*`号。在函数内部，参数`numbers`接收到的是一个tuple。二个参数和０个参数调用实例如下：
+
+  ```
+  >>> calc(1, 2)
+  5
+  >>> calc()
+  0
+  ```
+
+  如果已经有一个list或者tuple，要调用一个可变参数怎么办？可以这样做：
+
+  ```
+  >>> nums = [1, 2, 3]
+  >>> calc(nums[0], nums[1], nums[2])
+  14
+  ```
+
+  这种写法当然是可行的，问题是太繁琐，所以Python允许你在list或tuple前面加一个`*`号，**把list或tuple的元素变成可变参数传进去：**
+
+  ```
+  >>> nums = [1, 2, 3]
+  >>> calc(*nums)
+  14
+  ```
+
+  这种写法相当有用，而且很常见。
+
+- **关键字参数**
+
+  可变参数允许你传入0个或任意个参数，这些可变参数在函数调用时自动组装为一个tuple。而关键字参数允许你传入0个或任意个含参数名的参数，这些关键字参数在函数内部自动组装为一个dict。请看示例：
+
+  ```
+  def person(name, age, **kw):
+      print 'name:', name, 'age:', age, 'other:', kw
+  ```
+
+  函数`person`除了必选参数`name`和`age`外，还接受关键字参数`kw`。在调用该函数时，可以只传入必选参数：
+
+  ```
+  >>> person('Michael', 30)
+  name: Michael age: 30 other: {}
+  ```
+
+  也可以传入任意个数的关键字参数：
+
+
+```
+>>> person('Bob', 35, city='Beijing')
+name: Bob age: 35 other: {'city': 'Beijing'}
+>>> person('Adam', 45, gender='M', job='Engineer')
+name: Adam age: 45 other: {'gender': 'M', 'job': 'Engineer'}
+```
+
+关键字参数有什么用？它可以扩展函数的功能。比如，在`person`函数里，我们保证能接收到`name`和`age`这两个参数，但是，如果调用者愿意提供更多的参数，我们也能收到。试想你正在做一个用户注册的功能，除了用户名和年龄是必填项外，其他都是可选项，利用关键字参数来定义这个函数就能满足注册的需求。
+
+和可变参数类似，也可以先组装出一个dict，然后，把该dict转换为关键字参数传进去：
+
+```
+>>> kw = {'city': 'Beijing', 'job': 'Engineer'}
+>>> person('Jack', 24, city=kw['city'], job=kw['job'])
+name: Jack age: 24 other: {'city': 'Beijing', 'job': 'Engineer'}
+```
+
+当然，上面复杂的调用可以用简化的写法：
+
+```
+>>> kw = {'city': 'Beijing', 'job': 'Engineer'}
+>>> person('Jack', 24, **kw)
+name: Jack age: 24 other: {'city': 'Beijing', 'job': 'Engineer'}
+```
+
+- 小结
+
+Python的函数具有非常灵活的参数形态，既可以实现简单的调用，又可以传入非常复杂的参数。
+
+默认参数一定要用不可变对象，如果是可变对象，运行会有逻辑错误！
+
+要注意定义可变参数和关键字参数的语法：
+
+`*args`是可变参数，args接收的是一个tuple；
+
+`**kw`是关键字参数，kw接收的是一个dict。
+
+以及调用函数时如何传入可变参数和关键字参数的语法：
+
+可变参数既可以直接传入：`func(1, 2, 3)`，又可以先组装list或tuple，再通过`*args`传入：`func(*(1, 2, 3))`；
+
+关键字参数既可以直接传入：`func(a=1, b=2)`，又可以先组装dict，再通过`**kw`传入：`func(**{'a': 1, 'b': 2})`。
+
+使用`*args`和`**kw`是Python的习惯写法，当然也可以用其他参数名，但最好使用习惯用法。
+
+
+
+## 44、np.where()
+
+**numpy.where()** 有两种用法：
+
+- np.where(condition, x, y)
+
+满足条件(condition)，输出x，不满足输出y。
+ 
+
+ 如果是一维数组，相当于`[xv if c else yv for (c,xv,yv) in zip(condition,x,y)]`
+
+```
+>>> aa = np.arange(10)
+>>> np.where(aa,1,-1)
+array([-1,  1,  1,  1,  1,  1,  1,  1,  1,  1])  # 0为False，所以第一个输出-1
+>>> np.where(aa > 5,1,-1)
+array([-1, -1, -1, -1, -1, -1,  1,  1,  1,  1])
+
+>>> np.where([[True,False], [True,True]],    # 官网上的例子
+             [[1,2], [3,4]],
+             [[9,8], [7,6]])
+array([[1, 8],
+       [3, 4]])
+```
+
+上面这个例子的条件为`[[True,False], [True,False]]`，分别对应最后输出结果的四个值。第一个值从`[1,9]`中选，因为条件为True，所以是选1。第二个值从`[2,8]`中选，因为条件为False，所以选8，后面以此类推。类似的问题可以再看个例子：
+
+```
+>>> a = 10
+>>> np.where([[a > 5,a < 5], [a == 10,a == 7]],
+             [["chosen","not chosen"], ["chosen","not chosen"]],
+             [["not chosen","chosen"], ["not chosen","chosen"]])
+
+array([['chosen', 'chosen'],
+       ['chosen', 'chosen']], dtype='<U10')
+```
+
+-  np.where(condition)
+
+ 
+
+只有条件 (condition)，没有x和y，则输出满足条件 (即非0) 元素的坐标 (等价于[numpy.nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html#numpy.nonzero))。这里的坐标以tuple的形式给出，通常原数组有多少维，输出的tuple中就包含几个数组，分别对应符合条件元素的各维坐标。
+
+ 
+
+```
+>>> a = np.array([2,4,6,8,10])
+>>> np.where(a > 5)             # 返回索引
+(array([2, 3, 4]),)   
+>>> a[np.where(a > 5)]              # 等价于 a[a>5]
+array([ 6,  8, 10])
+
+>>> np.where([[0, 1], [1, 0]])
+(array([0, 1]), array([1, 0]))
+```
+
+ 
+
+上面这个例子条件中`[[0,1],[1,0]]`的真值为两个1，各自的第一维坐标为`[0,1]`，第二维坐标为`[1,0]` 。
+ 
+
+ 下面看个复杂点的例子：
+
+ 
+
+```
+>>> a = np.arange(27).reshape(3,3,3)
+>>> a
+array([[[ 0,  1,  2],
+        [ 3,  4,  5],
+        [ 6,  7,  8]],
+
+       [[ 9, 10, 11],
+        [12, 13, 14],
+        [15, 16, 17]],
+
+       [[18, 19, 20],
+        [21, 22, 23],
+        [24, 25, 26]]])
+
+>>> np.where(a > 5)
+(array([0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2]),
+ array([2, 2, 2, 0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 0, 0, 1, 1, 1, 2, 2, 2]),
+ array([0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]))
+
+
+# 符合条件的元素为
+       [ 6,  7,  8]],
+
+      [[ 9, 10, 11],
+       [12, 13, 14],
+       [15, 16, 17]],
+
+      [[18, 19, 20],
+       [21, 22, 23],
+       [24, 25, 26]]]
+```
+
+ 
+
+所以np.where会输出每个元素的对应的坐标，因为原数组有三维，所以tuple中有三个数组。
+
+
+
+## 45、OrderDict()
+
+
+
+- 普通的字典是按照hash来对字典进行排序，
+
+- 但是python中有个模块collections(英文，收集、集合)，里面自带了一个子类OrderedDict，实现了对字典对象中元素的排序。
+
+```
+import collections
+print "Regular dictionary"
+d={}
+d['a']='A'
+d['b']='B'
+d['c']='C'
+for k,v in d.items():
+    print k,v 
+print "\nOrder dictionary"
+d1 = collections.OrderedDict()
+d1['a'] = 'A'
+d1['b'] = 'B'
+d1['c'] = 'C'
+d1['1'] = '1'
+d1['2'] = '2'
+for k,v in d1.items():
+    print k,v
+
+输出：
+Regular dictionary
+a A
+c C
+b B
+
+Order dictionary
+a A
+b B
+c C
+1 1
+2 2
+```
+
+
+
+```
+dd = {'banana': 3, 'apple':4, 'pear': 1, 'orange': 2}
+#按key排序
+kd = collections.OrderedDict(sorted(dd.items(), key=lambda t: t[0]))
+print kd
+#按照value排序
+vd = collections.OrderedDict(sorted(dd.items(),key=lambda t:t[1]))
+print vd
+
+#输出
+OrderedDict([('apple', 4), ('banana', 3), ('orange', 2), ('pear', 1)])
+OrderedDict([('pear', 1), ('orange', 2), ('banana', 3), ('apple', 4)])
+```
+
+## 46、numpy view
+
+numpy视图是创新原矩阵的引用，并且id不同，但是共享数据元素，如果修改视图数据，原始矩阵也会发生改变，如果修改视图的shape,原始矩阵的shape不会发生改变。
+
+```
+import numpy as np 
+ 
+# 最开始 a 是个 3X2 的数组
+a = np.arange(6).reshape(3,2)  
+print ('数组 a：')
+print (a)
+print ('创建 a 的视图：')
+b = a.view()  
+print (b)
+print ('两个数组的 id() 不同：')
+print ('a 的 id()：')
+print (id(a))
+print ('b 的 id()：' )
+print (id(b))
+# 修改 b 的形状，并不会修改 a
+b.shape =  2,3
+print ('b 的形状：')
+print (b)
+print ('a 的形状：')
+print (a)
+
+数组 a：
+[[0 1]
+ [2 3]
+ [4 5]]
+创建 a 的视图：
+[[0 1]
+ [2 3]
+ [4 5]]
+两个数组的 id() 不同：
+a 的 id()：
+4314786992
+b 的 id()：
+4315171296
+b 的形状：
+[[0 1 2]
+ [3 4 5]]
+a 的形状：
+[[0 1]
+ [2 3]
+ [4 5]]
+```
+
+```
+import numpy as np 
+ 
+arr = np.arange(12)
+print ('我们的数组：')
+print (arr)
+print ('创建切片：')
+a=arr[3:]
+b=arr[3:]
+a[1]=123
+b[2]=234
+print(arr)
+print(id(a),id(b),id(arr[3:]))
+```
+
+```
+我们的数组：
+[ 0  1  2  3  4  5  6  7  8  9 10 11]
+创建切片：
+[  0   1   2   3 123 234   6   7   8   9  10  11]
+4545878416 4545878496 4545878576
+```
+
+
+
+---------------------
+
+
 # 三、Gym源码阅读
 
 ## 1、Discrete类
@@ -3669,7 +4193,7 @@ class MultiDiscrete(gym.Space):
 >  **说明：**1)主要记录平时遇到的tf函数，并且对函数的功能进行简单说明，举出相应的示例理解。
 >
 >  	    2)numpy函数以及相关python3相关函数说明
->  	    
+>  
 
 参考文献：
 
@@ -5771,6 +6295,8 @@ sess.close()
 
 tf.truncated_normal(shape, mean, stddev) :shape表示生成张量的维度，mean是均值，stddev是标准差。这个函数产生正太分布，均值和标准差自己设定。这是一个截断的产生正态分布的函数，就是说产生正太分布的值如果与均值的差值大于两倍的标准差，那就重新生成。和一般的正太分布的产生随机数据比起来，这个函数产生的随机数与均值的差距不会超过两倍的标准差，但是一般的别的函数是可能的。
 
+> 生成截断的正太方差；
+
 ```
 import tensorflow as tf;
 import numpy as np;
@@ -5810,8 +6336,8 @@ with tf.Session() as sess:
 
 ## 30、tf.argmax()
 
-​        首先，明确一点，tf.argmax可以认为就是np.argmax。tensorflow使用numpy实现的这个API。 
-　　 
+        首先，明确一点，tf.argmax可以认为就是np.argmax。tensorflow使用numpy实现的这个API。 
+
 　　简单的说，tf.argmax就是返回最大的那个数值所在的下标。 
 　　 
 　　这个很好理解，只是tf.argmax()的参数让人有些迷惑，比如，tf.argmax(array, 1)和tf.argmax(array, 0)有啥区别呢？ 
@@ -5830,7 +6356,7 @@ np.argmax(test, 1)　　　＃输出：array([2, 2, 0, 0])
 
 　　啥意思呢？
 
-- axis = 0: 
+- **axis = 0: 按列操作**
 
 　　你就这么想，0是最大的范围，所有的数组都要进行比较，只是比较的是这些数组相同位置上的数：
 
@@ -5842,7 +6368,7 @@ test[3] = array([8, 7, 2])
 output   :    [3, 3, 1]
 ```
 
-- axis = 1: 
+- **axis = 1: 按行操作**
 
 　　等于1的时候，比较范围缩小了，只会比较每个数组内的数的大小，结果也会根据有几个数组，产生几个结果。
 
@@ -6061,6 +6587,23 @@ CUDA_VISIBLE_DEVICES=0,1 python yourcode.py
 
 >  原文：https://blog.csdn.net/dcrmg/article/details/79091941 
 
+
+
+```
+    if GPU:
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(GPUID)
+        import tensorflow as tf
+        from keras import backend as K
+        config = tf.ConfigProto()
+        config.gpu_options.allocator_type = 'BFC'
+        config.gpu_options.per_process_gpu_memory_fraction = 0.3## GPU最大占用量
+        config.gpu_options.allow_growth = True##GPU是否可动态增加
+        K.set_session(tf.Session(config=config))
+        K.get_session().run(tf.global_variables_initializer())
+```
+
+
+
 ## 36、cmd GPU设置
 
 win10下cmd窗口，设置GPU运行程序，出现了无法识别CUDA_VISIABLE_DEVICES的问题。解决方法
@@ -6098,9 +6641,9 @@ CUDA_VISIBLE_DEVICES=2,0,3 # 只有编号为0,2,3的GPU对程序是可见的，�
     ```
 
 
-   
 
-## 37、tf.train.Save()
+
+## 37、tf.train.Saver()
 
 [`tf.train.Saver`](https://www.tensorflow.org/api_docs/python/tf/train/Saver?hl=zh-CN) 类提供了保存和恢复模型的方法。通过 [`tf.saved_model.simple_save`](https://www.tensorflow.org/api_docs/python/tf/saved_model/simple_save?hl=zh-CN) 函数可轻松地[保存适合投入使用的模型](https://www.tensorflow.org/api_docs/python/tf/saved_model?hl=zh-CN)。 [Estimator](https://www.tensorflow.org/guide/a href="../guide/estimators">Estimators 会自动保存和恢复 `model_dir` 中的变量。
 
@@ -6169,7 +6712,35 @@ with tf.Session() as sess:
 
 
 
+## 38、tf.multiply
 
+> 格式: tf.multiply(x, y, name=None)  
+
+参数:
+
+>  x: 一个类型为:half, float32, float64, uint8, int8, uint16, int16, int32, int64, complex64, complex128的张量。   y: 一个类型跟张量x相同的张量。  
+
+返回值： x * y element-wise.
+
+注意：   （1）multiply这个函数实现的是元素级别的相乘，也就是两个相乘的数元素各自相乘，而不是矩阵乘法，注意和tf.matmul区别。   （2）两个相乘的数必须有相同的数据类型，不然就会报错。
+
+## 39、tf.gather()
+
+> tf.gather(params, indices, validate_indices=None, name=None)：按照指定的下标集合从axis=0中抽取子集，适合抽取不连续区域
+
+
+
+```
+input = [[[1, 1, 1], [2, 2, 2]],
+
+         [[3, 3, 3], [4, 4, 4]],
+
+         [[5, 5, 5], [6, 6, 6]]]
+         
+tf.gather(input, [0, 2]) ==> [[[1, 1, 1], [2, 2, 2]],
+
+                              [[5, 5, 5], [6, 6, 6]]]
+```
 
 
 
