@@ -3895,7 +3895,7 @@ Python的函数具有非常灵活的参数形态，既可以实现简单的调�
 - np.where(condition, x, y)
 
 满足条件(condition)，输出x，不满足输出y。
- 
+
 
  如果是一维数组，相当于`[xv if c else yv for (c,xv,yv) in zip(condition,x,y)]`
 
@@ -3947,7 +3947,7 @@ array([ 6,  8, 10])
  
 
 上面这个例子条件中`[[0,1],[1,0]]`的真值为两个1，各自的第一维坐标为`[0,1]`，第二维坐标为`[1,0]` 。
- 
+
 
  下面看个复杂点的例子：
 
@@ -4120,12 +4120,122 @@ print(id(a),id(b),id(arr[3:]))
 4545878416 4545878496 4545878576
 ```
 
+# 三、Numpy
 
+### 1、基本操作
+
+> **Keys：**
+>
+> - np.sin()
+> - A.dot(B)：矩阵乘积
+> - A@B：矩阵乘积
+> - A.sum(),A.max(),A.min()：获取矩阵的和、最大值、最小值
+> - 
+
+数组上的算术运算符会应用到 *元素* 级别。下面是创建一个新数组并填充结果的示例：
+
+```python
+>>> a = np.array( [20,30,40,50] )
+>>> b = np.arange( 4 )
+>>> b
+array([0, 1, 2, 3])
+>>> c = a-b
+>>> c
+array([20, 29, 38, 47])
+>>> b**2
+array([0, 1, 4, 9])
+>>> 10*np.sin(a)
+array([ 9.12945251, -9.88031624,  7.4511316 , -2.62374854])
+>>> a<35
+array([ True, True, False, False])
+```
 
 ---------------------
 
+与许多矩阵语言不同，乘积运算符`*`在NumPy数组中按元素进行运算。矩阵乘积可以使用`@`运算符（在python> = 3.5中）或`dot`函数或方法执行：
 
-# 三、Gym源码阅读
+```python
+>>> A = np.array( [[1,1],
+...             [0,1]] )
+>>> B = np.array( [[2,0],
+...             [3,4]] )
+>>> A * B                       # elementwise product
+array([[2, 0],
+       [0, 4]])
+>>> A @ B                       # matrix product
+array([[5, 4],
+       [3, 4]])
+>>> A.dot(B)                    # another matrix product
+array([[5, 4],
+       [3, 4]])
+```
+
+许多一元操作，例如计算数组中所有元素的总和，都是作为`ndarray`类的方法实现的。
+
+```python
+>>> a = np.random.random((2,3))
+>>> a
+array([[ 0.18626021,  0.34556073,  0.39676747],
+       [ 0.53881673,  0.41919451,  0.6852195 ]])
+>>> a.sum()
+2.5718191614547998
+>>> a.min()
+0.1862602113776709
+>>> a.max()
+0.6852195003967595
+```
+
+默认情况下，这些操作适用于数组，就像它是一个数字列表一样，无论其形状如何。但是，通过指定`axis` 参数，您可以沿数组的指定轴应用操作：
+
+```python
+>>> b = np.arange(12).reshape(3,4)
+>>> b
+array([[ 0,  1,  2,  3],
+       [ 4,  5,  6,  7],
+       [ 8,  9, 10, 11]])
+>>>
+>>> b.sum(axis=0)                            # sum of each column
+array([12, 15, 18, 21])
+>>>
+>>> b.min(axis=1)                            # min of each row
+array([0, 4, 8])
+>>>
+>>> b.cumsum(axis=1)                         # cumulative sum along each row
+array([[ 0,  1,  3,  6],
+       [ 4,  9, 15, 22],
+       [ 8, 17, 27, 38]])
+```
+
+### 2、通函数（np.u_func()）
+
+NumPy提供熟悉的数学函数，例如sin，cos和exp。在NumPy中，这些被称为“通函数”（`ufunc`）。在NumPy中，这些函数在数组上按元素进行运算，产生一个数组作为输出。
+
+```python
+>>> B = np.arange(3)
+>>> B
+array([0, 1, 2])
+>>> np.exp(B)
+array([ 1.        ,  2.71828183,  7.3890561 ])
+>>> np.sqrt(B)
+array([ 0.        ,  1.        ,  1.41421356])
+>>> C = np.array([2., -1., 4.])
+>>> np.add(B, C)
+array([ 2.,  0.,  6.])
+```
+
+另见这些通函数
+
+[`all`](https://numpy.org/devdocs/reference/generated/numpy.all.html#numpy.all)， [`any`](https://numpy.org/devdocs/reference/generated/numpy.any.html#numpy.any)， [`apply_along_axis`](https://numpy.org/devdocs/reference/generated/numpy.apply_along_axis.html#numpy.apply_along_axis)， [`argmax`](https://numpy.org/devdocs/reference/generated/numpy.argmax.html#numpy.argmax)， [`argmin`](https://numpy.org/devdocs/reference/generated/numpy.argmin.html#numpy.argmin)， [`argsort`](https://numpy.org/devdocs/reference/generated/numpy.argsort.html#numpy.argsort)， [`average`](https://numpy.org/devdocs/reference/generated/numpy.average.html#numpy.average)， [`bincount`](https://numpy.org/devdocs/reference/generated/numpy.bincount.html#numpy.bincount)， [`ceil`](https://numpy.org/devdocs/reference/generated/numpy.ceil.html#numpy.ceil)， [`clip`](https://numpy.org/devdocs/reference/generated/numpy.clip.html#numpy.clip)， [`conj`](https://numpy.org/devdocs/reference/generated/numpy.conj.html#numpy.conj)， [`corrcoef`](https://numpy.org/devdocs/reference/generated/numpy.corrcoef.html#numpy.corrcoef)， [`cov`](https://numpy.org/devdocs/reference/generated/numpy.cov.html#numpy.cov)， [`cross`](https://numpy.org/devdocs/reference/generated/numpy.cross.html#numpy.cross)， [`cumprod`](https://numpy.org/devdocs/reference/generated/numpy.cumprod.html#numpy.cumprod)， [`cumsum`](https://numpy.org/devdocs/reference/generated/numpy.cumsum.html#numpy.cumsum)， [`diff`](https://numpy.org/devdocs/reference/generated/numpy.diff.html#numpy.diff)， [`dot`](https://numpy.org/devdocs/reference/generated/numpy.dot.html#numpy.dot)， [`floor`](https://numpy.org/devdocs/reference/generated/numpy.floor.html#numpy.floor)， [`inner`](https://numpy.org/devdocs/reference/generated/numpy.inner.html#numpy.inner)， *INV* ， [`lexsort`](https://numpy.org/devdocs/reference/generated/numpy.lexsort.html#numpy.lexsort)， [`max`](https://docs.python.org/dev/library/functions.html#max)， [`maximum`](https://numpy.org/devdocs/reference/generated/numpy.maximum.html#numpy.maximum)， [`mean`](https://numpy.org/devdocs/reference/generated/numpy.mean.html#numpy.mean)， [`median`](https://numpy.org/devdocs/reference/generated/numpy.median.html#numpy.median)， [`min`](https://docs.python.org/dev/library/functions.html#min)， [`minimum`](https://numpy.org/devdocs/reference/generated/numpy.minimum.html#numpy.minimum)， [`nonzero`](https://numpy.org/devdocs/reference/generated/numpy.nonzero.html#numpy.nonzero)， [`outer`](https://numpy.org/devdocs/reference/generated/numpy.outer.html#numpy.outer)， [`prod`](https://numpy.org/devdocs/reference/generated/numpy.prod.html#numpy.prod)， [`re`](https://docs.python.org/dev/library/re.html#module-re)， [`round`](https://docs.python.org/dev/library/functions.html#round)， [`sort`](https://numpy.org/devdocs/reference/generated/numpy.sort.html#numpy.sort)， [`std`](https://numpy.org/devdocs/reference/generated/numpy.std.html#numpy.std)， [`sum`](https://numpy.org/devdocs/reference/generated/numpy.sum.html#numpy.sum)， [`trace`](https://numpy.org/devdocs/reference/generated/numpy.trace.html#numpy.trace)， [`transpose`](https://numpy.org/devdocs/reference/generated/numpy.transpose.html#numpy.transpose)， [`var`](https://numpy.org/devdocs/reference/generated/numpy.var.html#numpy.var)， [`vdot`](https://numpy.org/devdocs/reference/generated/numpy.vdot.html#numpy.vdot)， [`vectorize`](https://numpy.org/devdocs/reference/generated/numpy.vectorize.html#numpy.vectorize)， [`where`](https://numpy.org/devdocs/reference/generated/numpy.where.html#numpy.where)
+
+
+
+
+
+
+
+
+
+# 四、Gym源码阅读
 
 ## 1、Discrete类
 
@@ -4188,7 +4298,7 @@ class MultiDiscrete(gym.Space):
 
 
 
-# 四、TensorFlow源码阅读-函数说明
+# 五、TensorFlow源码阅读-函数说明
 
 >  **说明：**1)主要记录平时遇到的tf函数，并且对函数的功能进行简单说明，举出相应的示例理解。
 >
@@ -6744,7 +6854,7 @@ tf.gather(input, [0, 2]) ==> [[[1, 1, 1], [2, 2, 2]],
 
 
 
-# 五、TensorFlow-Mnist
+# 六、TensorFlow-Mnist
 
 问题汇总：
 
@@ -6917,7 +7027,7 @@ if __name__ =="__main__":
 
 
 
-#  六、DQN源码阅读
+#  七、DQN源码阅读
 
 > 2018/8/20
 
